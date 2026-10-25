@@ -67,6 +67,8 @@ Depois, acesse **http://localhost:3000**. Para desenvolvimento com reinicializa�
 
 O arquivo `.env.example` não contém credenciais. **Nunca publique `.env`, tokens ou dados pessoais no GitHub.** Sem chave, o chatbot utiliza respostas demonstrativas. Uma chave configurada não prova, sozinha, que a integração real está funcionando.
 
+Para testar a Groq, informe sua própria chave em `GROQ_API_KEY` no arquivo `.env` local e reinicie o servidor. O chatbot identifica se a resposta veio da Groq ou do modo demonstrativo. A chave deve permanecer somente no servidor e não deve ser publicada.
+
 ## API REST
 
 | Método | Endpoint                                          | Finalidade                             |
@@ -106,7 +108,7 @@ npm test       # executa os testes automatizados da API
 npm run format:check # verifica a padronização do código
 ```
 
-Os testes cobrem catálogo, valores, validações, disponibilidade, conflito de horário, ciclo de pedido e os dois modos do chatbot (a chamada Groq é simulada nos testes). Consulte `design-qa.md` para o registro anterior de inspeção visual e suas limitações.
+Os testes cobrem catálogo, valores, validações, disponibilidade, conflito de horário, ciclo de pedido e os dois modos do chatbot (a chamada Groq é simulada nos testes). A inspeção visual em dispositivos reais continua pendente de validação pela equipe.
 
 ## Estrutura
 
@@ -119,11 +121,6 @@ lava-mais/
 │   └── app.js
 ├── tests/
 │   └── api.test.js
-├── docs/
-│   ├── referencias/      # telas de referência fornecidas
-│   ├── historico/        # evidências e documentos anteriores
-│   ├── CONFIGURAR_GROQ.md
-│   └── REGISTRO_IA.md
 ├── .env.example
 ├── .gitignore
 ├── iniciar.bat
@@ -152,7 +149,7 @@ O projeto está no GitHub: [Francisco-alt-coder/Lava-Mais](https://github.com/Fr
 
 ## Histórico e autoria
 
-O projeto preserva a arquitetura da versão 2.1 e os documentos anteriores em `docs/historico/`. A revisão 2.2 torna o código mais didático e corrige detalhes de interação, sem adicionar serviços reais. O registro do uso de IA, das fontes visuais e das validações pendentes está em [docs/REGISTRO_IA.md](docs/REGISTRO_IA.md).
+O projeto preserva a arquitetura da versão 2.1. A revisão 2.2 tornou o código mais didático e corrigiu detalhes de interação, sem adicionar serviços reais. Os documentos anteriores foram removidos da árvore atual para simplificar o repositório, mas podem ser recuperados pelo histórico de commits do Git.
 
 ### Participação dos estudantes
 
@@ -166,3 +163,14 @@ Os comentários nos arquivos explicam **como** e **por que** as funções foram 
 | Testes, revisão e apresentação       | [inserir nomes]               | [resultados e registros]   |
 
 **Transparência:** a revisão 2.2 foi preparada com apoio do ChatGPT. Antes da entrega, os estudantes devem executar o projeto, conferir os resultados, registrar suas próprias correções e preencher a declaração de uso de IA conforme as orientações da disciplina. Não atribua a um integrante uma atividade que ele não realizou.
+
+### Registro resumido do uso de IA
+
+| Campo                             | Informação                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Ferramenta                        | ChatGPT                                                                                          |
+| Finalidade                        | Revisão didática do código, correções, testes e organização do repositório                       |
+| Forma de utilização               | Análise e edição de JavaScript, Node.js, README e testes, com conferência no GitHub              |
+| Contribuição da IA                | Comentários explicativos, ajustes de horários e interface, documentação e apoio à publicação     |
+| Validações e correções dos alunos | [inserir responsáveis, testes manuais e modificações reais]                                      |
+| Evidências preservadas            | Histórico de commits, conversas, testes automatizados e versões anteriores recuperáveis pelo Git |
