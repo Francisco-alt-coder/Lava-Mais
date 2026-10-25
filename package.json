@@ -1,9 +1,9 @@
 {
   "name": "lava-mais-seis-telas",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
-  "description": "Protótipo acadêmico de lava-jatos com seis telas interativas, API Express e assistente Groq opcional",
+  "description": "Projeto acadêmico Lava Mais com agendamento demonstrativo, API Express e chatbot opcional",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",

@@ -7,16 +7,9 @@ import { randomUUID } from 'node:crypto';
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 const MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+// Horários fictícios usados no cenário de agendamento da disciplina.
 const SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '13:30', '14:00', '15:00', '16:00'];
-const STAGES = [
-  'Pedido confirmado',
-  'Indo buscar o veículo',
-  'Veículo retirado',
-  'Lavagem em andamento',
-  'Indo devolver',
-  'Veículo entregue',
-  'Recebimento confirmado',
-];
+// Catálogo de exemplo: nenhum estabelecimento ou preço é real.
 export const ESTABELECIMENTOS = [
   {
     id: 'brilho',
@@ -59,6 +52,7 @@ export const ESTABELECIMENTOS = [
   },
 ];
 
+// Centraliza o cálculo usado na criação do pedido e nos testes.
 export function precoServico(estabelecimento, veiculo, servico) {
   return servico === 'completa'
     ? estabelecimento[`completa${veiculo === 'carro' ? 'Carro' : 'Moto'}`]
@@ -72,6 +66,22 @@ function agoraLocal() {
     day: '2-digit',
   }).format(new Date());
 }
+function horaLocal() {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Fortaleza',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(new Date());
+}
+
+// Impede dois pedidos de demonstração no mesmo horário e estabelecimento.
+function horarioOcupado(storage, lavaJatoId, data, horario) {
+  return [...storage.values()].some(
+    (p) => p.lavaJatoId === lavaJatoId && p.data === data && p.horario === horario,
+  );
+}
+
 function dataValida(valor) {
   if (typeof valor !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
   const dt = new Date(valor + 'T12:00:00Z');
@@ -81,6 +91,7 @@ function erroLocal(msg) {
   return { erro: msg };
 }
 function respostaSemIA(msg) {
+  // Respostas locais mantêm a demonstração utilizável sem uma chave externa.
   const s = msg.toLowerCase();
   if (/preç|quanto|custa|valor|barat/.test(s)) {
     const menor = (campo) => Math.min(...ESTABELECIMENTOS.map((e) => e[campo]));
@@ -104,6 +115,7 @@ function respostaSemIA(msg) {
 
 export function createApp({ fetchImpl = fetch, storage = new Map() } = {}) {
   const app = express();
+  // Os pedidos e o limite de mensagens ficam só na memória deste processo.
   const limites = new Map();
   app.disable('x-powered-by');
   app.use((_req, res, next) => {
@@ -137,24 +149,14 @@ export function createApp({ fetchImpl = fetch, storage = new Map() } = {}) {
       horario,
       disponivel:
         horario !== '10:00' &&
-        !(
-          data === hoje &&
-          horario <=
-            new Intl.DateTimeFormat('en-GB', {
-              timeZone: 'America/Fortaleza',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            }).format(new Date())
-        ) &&
-        ![...storage.values()].some(
-          (p) =>
-            p.lavaJatoId === lavaJatoId && p.data === data && p.horario === horario && !p.problema,
-        ),
+        !(data === hoje && horario <= horaLocal()) &&
+        !horarioOcupado(storage, lavaJatoId, data, horario),
     }));
     return res.json({ horarios, demonstracao: true });
   });
   app.post('/api/pedidos', (req, res) => {
+    // Validação no servidor: não confiamos apenas nas escolhas mostradas no navegador.
+    // O total é calculado aqui para evitar valores modificados pelo usuário.
     const { lavaJatoId, veiculo, servico, retirada, endereco, data, horario } = req.body || {};
     const loja = ESTABELECIMENTOS.find((e) => e.id === lavaJatoId);
     if (
@@ -172,19 +174,10 @@ export function createApp({ fetchImpl = fetch, storage = new Map() } = {}) {
       return res
         .status(400)
         .json(erroLocal('Confira os dados do pedido, endereço, data e horário.'));
-    const nowHour = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'America/Fortaleza',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(new Date());
     if (
       horario === '10:00' ||
-      (data === agoraLocal() && horario <= nowHour) ||
-      [...storage.values()].some(
-        (p) =>
-          p.lavaJatoId === lavaJatoId && p.data === data && p.horario === horario && !p.problema,
-      )
+      (data === agoraLocal() && horario <= horaLocal()) ||
+      horarioOcupado(storage, lavaJatoId, data, horario)
     )
       return res.status(409).json(erroLocal('Horário indisponível. Escolha outro horário.'));
     const base = precoServico(loja, veiculo, servico);
@@ -223,6 +216,7 @@ export function createApp({ fetchImpl = fetch, storage = new Map() } = {}) {
     res.json({ pedido });
   });
   app.patch('/api/pedidos/:id/avancar', (req, res) => {
+    // O avanço é manual: não existe funcionário nem rastreamento em tempo real.
     const pedido = storage.get(req.params.id);
     if (!pedido) return res.status(404).json(erroLocal('Pedido não encontrado.'));
     if (pedido.etapa >= 5)
@@ -251,6 +245,7 @@ export function createApp({ fetchImpl = fetch, storage = new Map() } = {}) {
     res.json({ pedido, aviso: 'Problema registrado apenas na demonstração.' });
   });
   app.post('/api/chat', async (req, res) => {
+    // Limite simples por IP para evitar excesso de mensagens nesta demonstração.
     const ip = req.ip || 'local',
       now = Date.now();
     const count = limites.get(ip) || { inicio: now, n: 0 };
@@ -280,6 +275,7 @@ export function createApp({ fetchImpl = fetch, storage = new Map() } = {}) {
       return res.status(400).json(erroLocal('Histórico inválido.'));
     const chave = process.env.GROQ_API_KEY?.trim();
     if (!chave) return res.json({ resposta: respostaSemIA(mensagem), modo: 'demonstracao' });
+    // Com uma chave configurada, apenas o servidor conversa com a Groq.
     const catalogo = ESTABELECIMENTOS.map(
       (e) =>
         `${e.nome}: simples carro R$ ${e.carro}, simples moto R$ ${e.moto}, completa carro R$ ${e.completaCarro}, completa moto R$ ${e.completaMoto}, retirada/devolução R$ ${e.retirada}; distância fictícia ${e.distancia} km; avaliação fictícia ${e.nota}.`,
@@ -349,7 +345,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       ? requestedPort
       : 3000;
   const hostArg = process.argv.indexOf('--host');
-  const host = hostArg >= 0 ? process.argv[hostArg + 1] : undefined;
+  // Por padrão, o protótipo atende somente neste computador.
+  const host = hostArg >= 0 ? process.argv[hostArg + 1] : '127.0.0.1';
   createApp().listen(port, host, () =>
     console.log(
       `Lava Mais em http://localhost:${port} · chatbot: ${process.env.GROQ_API_KEY?.trim() ? 'Groq' : 'demonstração local'}`,

@@ -1,8 +1,10 @@
-# Lava Mais
+# Lava Mais · Projeto acadêmico
 
-Protótipo acadêmico de uma aplicação web para explorar serviços de lavagem de veículos e simular agendamento, retirada, acompanhamento e entrega. A interface segue seis referências visuais de aplicativo móvel e também pode ser demonstrada em um navegador de computador.
+Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A aplicação permite explorar serviços de lavagem de veículos e simular agendamento, retirada, acompanhamento e entrega. O foco desta versão é apresentar um fluxo completo e compreensível, com HTML, CSS, JavaScript e uma API simples.
 
 > **Status: demonstração.** Os lava-jatos, funcionários, avaliações, distâncias, valores e pedidos são fictícios. Nenhum serviço é contratado de verdade.
+
+**Etapa acadêmica:** protótipo de interface integrado a uma API. A correspondência com uma TED específica, os requisitos aprovados e a validação de um cliente ainda precisam ser informados pela equipe.
 
 ## Funcionalidades demonstradas
 
@@ -13,7 +15,7 @@ Protótipo acadêmico de uma aplicação web para explorar serviços de lavagem 
 5. **Acompanhamento:** progresso por etapas, avançado manualmente na demonstração.
 6. **Entrega:** avaliação de 1 a 5 estrelas, confirmação e registro de problema.
 
-As abas **Pedidos** e **Perfil** complementam a navegação. O assistente virtual responde com regras locais quando a Groq não está configurada; com chave válida, o servidor envia perguntas à API da Groq.
+As abas **Pedidos** e **Perfil** complementam a navegação. A interface apresenta o último pedido criado naquele navegador. O assistente responde com regras locais quando a Groq não está configurada; com chave válida, o servidor tenta consultar a API da Groq.
 
 ## Tecnologias
 
@@ -26,7 +28,17 @@ As abas **Pedidos** e **Perfil** complementam a navegação. O assistente virtua
 | Testes         | Executor de testes nativo do Node.js                                    |
 | Imagens        | Ilustrações próprias criadas com auxílio de IA e referências fornecidas |
 
-Não são necessários React, banco de dados ou ferramentas de compilação para executar esta versão.
+Não são necessários React, banco de dados ou ferramentas de compilação para executar esta versão. Os arquivos foram mantidos separados por responsabilidade para facilitar a explicação e a manutenção.
+
+## Como o código funciona
+
+1. `public/index.html` define a estrutura da página e os elementos principais.
+2. `public/app.css` define a aparência e a adaptação para telas menores.
+3. `public/app.js` mantém o estado das telas, reage aos cliques e utiliza `fetch()` para conversar com a API. Os comentários explicam as funções principais.
+4. `server.js` cria as rotas do Express, valida os pedidos, calcula preços e guarda os pedidos temporariamente em memória.
+5. `tests/api.test.js` executa chamadas HTTP automatizadas, verificando os principais comportamentos da API.
+
+**Fluxo para demonstrar em sala:** Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega. Selecione um horário livre; 10:00 fica bloqueado intencionalmente.
 
 ## Requisitos e execução
 
@@ -43,7 +55,7 @@ npm start
 
 No PowerShell, substitua o comando de cópia por `Copy-Item .env.example .env`. O arquivo `iniciar.bat` também pode iniciar a demonstração no Windows.
 
-Depois, acesse **http://localhost:3000**. Para desenvolvimento com reinicialização automática, use `npm run dev`.
+Depois, acesse **http://localhost:3000**. Para desenvolvimento com reinicialização automática, use `npm run dev`. Por segurança, o servidor inicia acessível somente neste computador (`127.0.0.1`).
 
 ### Variáveis de ambiente
 
@@ -94,7 +106,7 @@ npm test       # executa os testes automatizados da API
 npm run format:check # verifica a padronização do código
 ```
 
-Os testes cobrem catálogo, valores, validações, conflito de horário, ciclo de pedido e os dois modos do chatbot (a chamada Groq é simulada nos testes). Consulte `design-qa.md` para o registro da inspeção visual e suas limitações.
+Os testes cobrem catálogo, valores, validações, disponibilidade, conflito de horário, ciclo de pedido e os dois modos do chatbot (a chamada Groq é simulada nos testes). Consulte `design-qa.md` para o registro anterior de inspeção visual e suas limitações.
 
 ## Estrutura
 
@@ -124,6 +136,7 @@ lava-mais/
 ## Limitações e segurança
 
 - Pedidos são guardados apenas em memória e desaparecem ao reiniciar o servidor.
+- O navegador lembra somente o identificador do último pedido. Não é um histórico de usuário.
 - Não existem autenticação, autorização, banco de dados, pagamentos, geolocalização ou rastreamento real.
 - O catálogo é fictício. O botão de ligar não faz chamadas telefônicas.
 - Endpoints de pedidos não têm controle de acesso: **não use dados pessoais reais nem publique esta API como serviço de produção**.
@@ -133,21 +146,23 @@ lava-mais/
 
 O código está disponível para avaliação acadêmica. A licença de distribuição **não foi definida pela equipe**; confirme-a antes de tornar o repositório público ou aceitar contribuições.
 
-## Publicação do código no GitHub
+## Repositório e atualização
 
-Depois de revisar os arquivos e criar um **repositório vazio** na sua conta do GitHub, execute na pasta do projeto:
-
-```bash
-git init
-git add .
-git commit -m "feat: prepara prototipo Lava Mais para demonstracao"
-git branch -M main
-git remote add origin https://github.com/SEU_USUARIO/lava-mais.git
-git push -u origin main
-```
-
-Troque `SEU_USUARIO` pelo usuário real. Se o destino já tiver commits ou arquivos, confira o histórico antes de configurar o remoto, para não sobrescrever trabalho existente. O Git pode solicitar que você configure sua identidade de autor e a autenticação da sua conta.
+O projeto está no GitHub: [Francisco-alt-coder/Lava-Mais](https://github.com/Francisco-alt-coder/Lava-Mais). Antes de publicar uma nova versão, a equipe deve conferir as alterações com `git status` e `git diff`, testar o funcionamento e fazer um commit com uma mensagem que descreva a mudança. Nenhum envio automático ao GitHub é exigido para executar o projeto localmente.
 
 ## Histórico e autoria
 
-O projeto preserva a arquitetura entregue no ZIP original e os documentos anteriores em `docs/historico/`. A revisão atual modifica a identidade visual e a organização dos arquivos, sem adicionar serviços reais. O registro do uso de IA, das fontes visuais e das validações pendentes está em [docs/REGISTRO_IA.md](docs/REGISTRO_IA.md).
+O projeto preserva a arquitetura da versão 2.1 e os documentos anteriores em `docs/historico/`. A revisão 2.2 torna o código mais didático e corrige detalhes de interação, sem adicionar serviços reais. O registro do uso de IA, das fontes visuais e das validações pendentes está em [docs/REGISTRO_IA.md](docs/REGISTRO_IA.md).
+
+### Participação dos estudantes
+
+Os comentários nos arquivos explicam **como** e **por que** as funções foram organizadas, ajudando os integrantes a estudar e defender o código. Eles não comprovam, isoladamente, a autoria. A equipe deve registrar suas contribuições reais e as modificações que compreender, revisar ou realizar.
+
+| Atividade                            | Integrante(s) responsável(is) | Evidência real             |
+| ------------------------------------ | ----------------------------- | -------------------------- |
+| Requisitos e decisões do protótipo   | [inserir nomes]               | [ata, documento ou commit] |
+| Interface e navegação                | [inserir nomes]               | [commits ou capturas]      |
+| API, agendamento e regras de negócio | [inserir nomes]               | [commits ou testes]        |
+| Testes, revisão e apresentação       | [inserir nomes]               | [resultados e registros]   |
+
+**Transparência:** a revisão 2.2 foi preparada com apoio do ChatGPT. Antes da entrega, os estudantes devem executar o projeto, conferir os resultados, registrar suas próprias correções e preencher a declaração de uso de IA conforme as orientações da disciplina. Não atribua a um integrante uma atividade que ele não realizou.

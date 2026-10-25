@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp, ESTABELECIMENTOS, precoServico } from '../server.js';
 
+// Cada teste sobe uma API local com pedidos vazios, sem alterar dados reais.
 async function servidorTeste(fn, { fetchImpl } = {}) {
   const server = createApp({ fetchImpl, storage: new Map() }).listen(0, '127.0.0.1');
   await new Promise((r) => server.once('listening', r));
@@ -64,6 +65,28 @@ test('pedido cria valor no backend, bloqueia conflito e preserva leitura', async
     assert.equal(r.data.pedido.etapa, 0);
     assert.equal((await call(`/api/pedidos/${r.data.pedido.id}`)).status, 200);
     assert.equal((await call('/api/pedidos', { method: 'POST', body: pedido() })).status, 409);
+  }));
+test('horário ocupado deixa de aparecer como disponível', async () =>
+  servidorTeste(async (call) => {
+    const dados = pedido();
+    const query = `/api/horarios?lavaJatoId=${dados.lavaJatoId}&data=${dados.data}`;
+    const antes = await call(query);
+    assert.equal(antes.data.horarios.find((h) => h.horario === dados.horario).disponivel, true);
+    assert.equal((await call('/api/pedidos', { method: 'POST', body: dados })).status, 201);
+    const depois = await call(query);
+    assert.equal(depois.data.horarios.find((h) => h.horario === dados.horario).disponivel, false);
+  }));
+test('relatar problema não libera o horário de um pedido existente', async () =>
+  servidorTeste(async (call) => {
+    const dados = pedido();
+    const criado = await call('/api/pedidos', { method: 'POST', body: dados });
+    assert.equal(criado.status, 201);
+    const resposta = await call(`/api/pedidos/${criado.data.pedido.id}/problema`, {
+      method: 'POST',
+      body: { descricao: 'Problema relatado no atendimento demonstrativo.' },
+    });
+    assert.equal(resposta.status, 200);
+    assert.equal((await call('/api/pedidos', { method: 'POST', body: dados })).status, 409);
   }));
 test('não permite pedido sem endereço, data passada ou horário indisponível', async () =>
   servidorTeste(async (call) => {

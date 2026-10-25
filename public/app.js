@@ -1,4 +1,7 @@
+// Lava Mais: interface em JavaScript puro para facilitar a leitura acadêmica.
+// O servidor fornece os dados; este arquivo controla telas, eventos e mensagens.
 const $ = (selector) => document.querySelector(selector);
+// O identificador do pedido é lembrado no navegador, mas o pedido fica no servidor.
 const storageGet = (k) => {
   try {
     return localStorage.getItem(k);
@@ -49,8 +52,10 @@ const paths = {
   sparkle: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/>',
   close: '<path d="M5 5 19 19M19 5 5 19"/>',
 };
+// Ícones SVG locais, sem biblioteca adicional.
 const icon = (name, className = '') =>
   `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.sparkle}</svg>`;
+// Escapa textos antes de colocá-los no HTML, evitando interpretar tags digitadas.
 const h = (text = '') =>
   String(text).replace(
     /[&<>"']/g,
@@ -81,6 +86,7 @@ function diaFormatado(iso) {
   }).format(new Date(iso + 'T12:00:00Z'));
 }
 
+// Estado temporário da interface. Não substitui banco de dados ou autenticação.
 const state = {
   screen: 'inicio',
   veiculo: 'carro',
@@ -124,6 +130,7 @@ function notify(msg) {
   clearTimeout(notify.timer);
   notify.timer = setTimeout(() => el.classList.add('hidden'), 3300);
 }
+// Todas as chamadas à API passam por esta função e tratam erros HTTP.
 async function api(path, options = {}) {
   let response;
   try {
@@ -156,6 +163,7 @@ function renderHeader() {
   $('#header').innerHTML =
     `${screen !== 'inicio' ? `<button class="back" data-action="voltar" aria-label="Voltar">${icon('back')}</button>` : ''}<h1>${h(titles[screen] || '')}</h1>${screen === 'detalhes' ? `<button class="heart-btn ${state.favoritos.has(state.lavaJatoId) ? 'selected' : ''}" data-action="favorito" aria-label="Favoritar lava-jato">${icon('heart')}</button>` : ''}`;
 }
+// Cada função a seguir monta uma tela; render() escolhe qual mostrar.
 function renderTabs() {
   const visible = ['inicio', 'lista', 'pedidos', 'perfil'].includes(state.screen);
   $('#tabbar').classList.toggle('hidden', !visible);
@@ -218,11 +226,50 @@ function summary(pedido = null) {
 }
 function agendamento() {
   const disponivel = state.horarios.find((t) => t.horario === state.horario)?.disponivel === true;
-  return `<div class="field-block"><label>${icon('pin')}Endereço de retirada</label>${addressCard()}</div><div class="field-block"><label for="agData">${icon('calendar')}Data</label><input class="date-input" id="agData" type="date" min="${localDate()}" value="${h(state.data)}"/></div><div class="field-block"><label>${icon('clock')}Horário</label><div class="time-grid">${state.horarios.length ? state.horarios.map((t) => `<button class="time-option ${state.horario === t.horario ? 'active' : ''} ${!t.disponivel ? 'unavailable' : ''}" data-action="horario" data-horario="${t.horario}" aria-label="${t.horario}${t.disponivel ? '' : ' indisponível'}" aria-pressed="${state.horario === t.horario}">${t.horario}</button>`).join('') : '<span class="muted-small">Carregando horários...</span>'}</div>${!disponivel ? `<div class="error-box">${icon('alert')}Horário indisponível. Escolha outro horário.</div><button class="secondary-btn" style="margin-top:10px" data-action="outro-horario">Selecionar outro horário</button>` : ''}</div>${summary()}<button class="primary-btn" data-action="confirmar-pedido" ${!disponivel ? 'disabled' : ''}>Confirmar pedido ${icon('arrow')}</button><p class="small-warning">Agendamento demonstrativo, sem pagamento ou reserva em estabelecimento real.</p>`;
+  // A API informa quais horários podem ser escolhidos; os demais ficam desativados.
+  const botoesHorarios = state.horarios.length
+    ? state.horarios
+        .map(
+          (t) => `
+          <button class="time-option ${state.horario === t.horario ? 'active' : ''} ${!t.disponivel ? 'unavailable' : ''}"
+            data-action="horario" data-horario="${t.horario}"
+            aria-label="${t.horario}${t.disponivel ? '' : ' indisponível'}"
+            aria-pressed="${state.horario === t.horario}" ${!t.disponivel ? 'disabled' : ''}>
+            ${t.horario}
+          </button>`,
+        )
+        .join('')
+    : '<span class="muted-small">Carregando horários...</span>';
+
+  return `
+    <div class="field-block">
+      <label>${icon('pin')}Endereço de retirada</label>
+      ${addressCard()}
+    </div>
+    <div class="field-block">
+      <label for="agData">${icon('calendar')}Data</label>
+      <input class="date-input" id="agData" type="date" min="${localDate()}" value="${h(state.data)}"/>
+    </div>
+    <div class="field-block">
+      <label>${icon('clock')}Horário</label>
+      <div class="time-grid">${botoesHorarios}</div>
+      ${
+        !disponivel
+          ? `<div class="error-box">${icon('alert')}Horário indisponível. Escolha outro horário.</div>
+             <button class="secondary-btn" style="margin-top:10px" data-action="outro-horario">Selecionar outro horário</button>`
+          : ''
+      }
+    </div>
+    ${summary()}
+    <button class="primary-btn" data-action="confirmar-pedido" ${!disponivel ? 'disabled' : ''}>
+      Confirmar pedido ${icon('arrow')}
+    </button>
+    <p class="small-warning">Agendamento demonstrativo, sem pagamento ou reserva em estabelecimento real.</p>`;
 }
 function tracking() {
   const p = state.pedido;
   if (!p) return emptyPedidos();
+  // As etapas são avançadas manualmente para demonstrar a sequência do serviço.
   const stages = [
     'Pedido confirmado',
     'Indo buscar o veículo',
@@ -231,14 +278,64 @@ function tracking() {
     'Indo devolver',
     'Veículo entregue',
   ];
-  return `<div class="employee"><div class="avatar">${icon('user')}</div><div class="bio"><span>Funcionário responsável</span><strong>${h(p.funcionario)}</strong>${h(p.loja)}</div><button class="call" data-action="ligar">${icon('phone')}Ligar</button></div><div class="tracking-art"><img src="/assets/retirada-entrega.webp" alt="Ilustração do veículo de retirada e entrega"></div><div class="timeline">${stages.map((s, i) => `<div class="timeline-item"><span class="timeline-dot ${p.etapa > i ? 'done' : p.etapa === i ? 'current' : ''}">${p.etapa > i ? icon('check') : ''}</span><div class="timeline-detail"><strong class="${p.etapa >= i ? 'done-text' : ''}">${s}</strong>${i === 1 && p.etapa === 1 ? '<small>Funcionário a caminho do endereço (simulação).</small>' : ''}${i === 3 && p.etapa === 3 ? '<small>Seu veículo está sendo lavado (simulação).</small>' : ''}</div></div>`).join('')}</div><div class="tracking-actions"><button class="secondary-btn" data-action="chat">${icon('message')}Falar com o lava-jato</button><button class="secondary-btn" data-action="atualizar">${icon('refresh')}Atualizar</button></div><button class="primary-btn" style="margin-top:12px" data-action="avancar">Avançar etapa (demo) ${icon('arrow')}</button><p class="small-warning">Etapas manuais para demonstração. Não há localização ou previsão em tempo real.</p>`;
+  const etapasHtml = stages
+    .map(
+      (s, i) => `
+      <div class="timeline-item">
+        <span class="timeline-dot ${p.etapa > i ? 'done' : p.etapa === i ? 'current' : ''}">
+          ${p.etapa > i ? icon('check') : ''}
+        </span>
+        <div class="timeline-detail">
+          <strong class="${p.etapa >= i ? 'done-text' : ''}">${s}</strong>
+          ${i === 1 && p.etapa === 1 ? '<small>Funcionário a caminho (simulação).</small>' : ''}
+          ${i === 3 && p.etapa === 3 ? '<small>Seu veículo está sendo lavado (simulação).</small>' : ''}
+        </div>
+      </div>`,
+    )
+    .join('');
+
+  return `
+    <div class="employee">
+      <div class="avatar">${icon('user')}</div>
+      <div class="bio"><span>Funcionário demonstrativo</span><strong>${h(p.funcionario)}</strong>${h(p.loja)}</div>
+      <button class="call" data-action="ligar">${icon('phone')}Ligar</button>
+    </div>
+    <div class="tracking-art"><img src="/assets/retirada-entrega.webp" alt="Ilustração do veículo de retirada e entrega"></div>
+    <div class="timeline">${etapasHtml}</div>
+    <div class="tracking-actions">
+      <button class="secondary-btn" data-action="chat">${icon('message')}Abrir assistente (demo)</button>
+      <button class="secondary-btn" data-action="atualizar">${icon('refresh')}Atualizar</button>
+    </div>
+    <button class="primary-btn" style="margin-top:12px" data-action="avancar">Avançar etapa (demo) ${icon('arrow')}</button>
+    <p class="small-warning">Etapas manuais para demonstração. Não há localização ou previsão em tempo real.</p>`;
 }
 function delivery() {
   const p = state.pedido;
   if (!p) return emptyPedidos();
   if (p.etapa === 6)
     return `<div class="delivery-confirmed"><div class="big-check">${icon('check')}</div><h2>Recebimento confirmado!</h2><p>Obrigado por avaliar sua experiência. Seu pedido demonstrativo foi concluído com sucesso.</p>${summary(p)}<button class="primary-btn" data-action="inicio">Voltar ao início ${icon('arrow')}</button></div>`;
-  return `<div class="deliver-hero"><div class="big-check">${icon('check')}</div><div><h2>Seu veículo foi devolvido!</h2><p>Confira o veículo e confirme o recebimento.</p></div></div><img class="delivery-art" src="/assets/retirada-entrega.webp" alt="Ilustração de entrega de veículo">${summary(p)}<div class="stars"><span>Como foi o serviço?</span>${[1, 2, 3, 4, 5].map((n) => `<button data-action="avaliar" data-nota="${n}" class="star-btn ${state.avaliacao >= n ? 'selected' : ''}" aria-label="Avaliar ${n} estrelas" aria-pressed="${state.avaliacao === n}"><svg viewBox="0 0 24 24" style="fill:${state.avaliacao >= n ? '#f0ab25' : 'transparent'}">${paths.star}</svg></button>`).join('')}</div><div class="stack-buttons"><button class="primary-btn" data-action="confirmar-entrega" ${!state.avaliacao ? 'disabled' : ''}>Confirmar recebimento</button><button class="secondary-btn" data-action="problema">${icon('alert')}Informar problema</button></div><p class="small-warning">Confirmação e avaliação registradas somente nesta demonstração.</p>`;
+  const estrelas = [1, 2, 3, 4, 5]
+    .map(
+      (n) => `<button data-action="avaliar" data-nota="${n}"
+          class="star-btn ${state.avaliacao >= n ? 'selected' : ''}"
+          aria-label="Avaliar ${n} estrelas" aria-pressed="${state.avaliacao === n}">
+          <svg viewBox="0 0 24 24" style="fill:${state.avaliacao >= n ? '#f0ab25' : 'transparent'}">${paths.star}</svg>
+        </button>`,
+    )
+    .join('');
+  return `
+    <div class="deliver-hero">
+      <div class="big-check">${icon('check')}</div>
+      <div><h2>Seu veículo foi devolvido!</h2><p>Confira o veículo e confirme o recebimento.</p></div>
+    </div>
+    <img class="delivery-art" src="/assets/retirada-entrega.webp" alt="Ilustração de entrega de veículo">
+    ${summary(p)}
+    <div class="stars"><span>Como foi o serviço?</span>${estrelas}</div>
+    <div class="stack-buttons">
+      <button class="primary-btn" data-action="confirmar-entrega" ${!state.avaliacao ? 'disabled' : ''}>Confirmar recebimento</button>
+      <button class="secondary-btn" data-action="problema">${icon('alert')}Informar problema</button>
+    </div>
+    <p class="small-warning">Confirmação e avaliação registradas somente nesta demonstração.</p>`;
 }
 function emptyPedidos() {
   return `<div class="empty-state">${icon('orders')}<h2>Nenhum pedido por aqui</h2><p>Faça um agendamento de demonstração para acompanhar o pedido.</p><button class="primary-btn" data-action="inicio">Buscar lava-jatos ${icon('arrow')}</button></div>`;
@@ -252,6 +349,7 @@ function perfil() {
   return `<div class="empty-state" style="margin-top:20px">${icon('user')}<h2>Meu perfil</h2><p>Este protótipo ainda não possui cadastro, autenticação ou conta de usuário.</p></div><h2 class="label-title">${icon('pin')}Endereço demonstrativo</h2>${addressCard()}<button class="secondary-btn" style="margin-top:20px" data-action="chat">${icon('bot')}Conversar com assistente</button><p class="small-warning" style="margin-top:18px">O assistente usa dados ilustrativos. Não informe informações pessoais reais.</p>`;
 }
 function render() {
+  // A tela atual é escolhida pelo estado, sem precisar recarregar a página.
   renderHeader();
   renderTabs();
   const screens = {
@@ -271,6 +369,7 @@ function navigate(dest) {
   render();
   $('#page').scrollTop = 0;
 }
+// Consulta o servidor sempre que o estabelecimento ou a data mudam.
 async function loadSlots() {
   try {
     state.horarios = (
@@ -285,13 +384,15 @@ async function loadSlots() {
   if (state.screen === 'agendamento') render();
 }
 async function loadPedido() {
-  if (!state.pedido) return;
+  if (!state.pedido) return false;
   try {
     state.pedido = (await api(`/api/pedidos/${state.pedido.id}`)).pedido;
   } catch (e) {
     notify(e.message);
+    return false;
   }
   render();
+  return true;
 }
 function modal(title, description, withText = false) {
   $('#modal').innerHTML =
@@ -358,7 +459,7 @@ $('#chatSend').innerHTML = icon('send');
 $('#modal').addEventListener('click', (event) => {
   if (event.target.id === 'modal') closeModal();
 });
-// Navegação e controles por delegação, compatíveis com telas renderizadas novamente.
+// Delegação de eventos: os botões continuam funcionando após renderizar outra tela.
 document.addEventListener('click', async (event) => {
   const btn = event.target.closest('[data-action]');
   if (!btn || btn.disabled) return;
@@ -449,6 +550,7 @@ document.addEventListener('click', async (event) => {
       return;
     }
     if (action === 'confirmar-pedido') {
+      // O navegador envia as escolhas; a API valida o horário e calcula o valor final.
       btn.disabled = true;
       try {
         const j = await api('/api/pedidos', {
@@ -487,8 +589,7 @@ document.addEventListener('click', async (event) => {
       return;
     }
     if (action === 'atualizar') {
-      await loadPedido();
-      notify('Estado demonstrativo atualizado.');
+      if (await loadPedido()) notify('Estado demonstrativo atualizado.');
       return;
     }
     if (action === 'ligar') {
@@ -587,6 +688,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 async function init() {
+  // Carrega os dados iniciais e tenta recuperar o último pedido desta sessão.
   try {
     const status = await api('/api/health');
     state.chatMode =
