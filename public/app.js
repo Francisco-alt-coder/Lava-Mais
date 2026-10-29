@@ -546,6 +546,7 @@ document.addEventListener('click', async (event) => {
     }
     if (action === 'filtro') {
       state.filtro = btn.dataset.filtro;
+      if (state.filtro === 'carro' || state.filtro === 'moto') state.veiculo = state.filtro;
       render();
       return;
     }
