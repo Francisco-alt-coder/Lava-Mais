@@ -165,6 +165,7 @@ function renderHeader() {
 }
 // Cada função a seguir monta uma tela; render() escolhe qual mostrar.
 function renderTabs() {
+  // Navegação principal fiel às três abas das telas aprovadas.
   const visible = ['inicio', 'lista', 'pedidos', 'perfil'].includes(state.screen);
   $('#tabbar').classList.toggle('hidden', !visible);
   $('#page').classList.toggle('no-nav', !visible);
@@ -172,16 +173,13 @@ function renderTabs() {
     ['inicio', 'home', 'Início'],
     ['pedidos', 'orders', 'Pedidos'],
     ['perfil', 'user', 'Perfil'],
-    ['chat', 'bot', 'IA'],
   ].map(([screen, symbol, label]) =>
     `<button type="button" class="tab ${screen === state.screen || (state.screen === 'lista' && screen === 'inicio') ? 'active' : ''}"
-      data-action="${screen === 'chat' ? 'chat' : 'tab'}"
-      ${screen === 'chat' ? 'aria-label="Abrir assistente de IA"' : `data-screen="${screen}"`}
-      ${screen === 'chat' ? '' : `aria-current="${screen === state.screen ? 'page' : 'false'}"`}>
+      data-action="tab" data-screen="${screen}"
+      aria-current="${screen === state.screen ? 'page' : 'false'}">
       ${icon(symbol)}<span>${label}</span>
     </button>`
   ).join('');
-  $('#chatFab').innerHTML = icon('bot');
 }
 function addressCard() {
   return `<button class="location-card" data-action="endereco"><span class="location-icon">${icon('pin')}</span><span><strong>${h(state.endereco.split(',').slice(0, 2).join(',') || 'Definir endereço')}</strong><br>${h(state.endereco.split(',').slice(2).join(',').trim() || 'Toque para alterar')}</span>${icon('chevron', 'chevron')}</button>`;
@@ -191,7 +189,6 @@ function home() {
       <div class="hero-brand"><span class="hero-icon">${icon('car')}</span><strong>Lava Mais</strong></div>
       <h2>Seu veículo limpo sem sair de casa</h2>
       <p>Agende, acompanhe e receba seu veículo com tranquilidade.</p>
-      <span class="hero-demo">Simulação acadêmica</span>
     </section>
     <h2 class="label-title">${icon('pin')} Sua localização</h2>
     ${addressCard()}
@@ -207,11 +204,6 @@ function home() {
       </button>
     </div>
     <div class="home-bottom"><button class="primary-btn" data-action="buscar">Buscar lava-jatos ${icon('arrow')}</button></div>
-    <section class="assistant-teaser">
-      <span class="assistant-teaser-icon">${icon('bot')}</span>
-      <div><strong>Dúvidas? Fale com nossa IA</strong><small>Serviços, valores ilustrativos e como agendar.</small></div>
-      <button class="assistant-open" data-action="chat" aria-label="Conversar com assistente IA">${icon('chevron')}</button>
-    </section>
     <p class="small-warning">Lava-jatos, endereços e pedidos fictícios. Nenhuma reserva real é realizada.</p>`;
 }
 function storeCard(e) {
@@ -326,7 +318,7 @@ function tracking() {
       <div class="tracking-primary">
         <div class="employee"><span class="avatar">${icon('user')}</span><div class="bio">
           <span>Equipe demonstrativa</span><strong>${h(p.funcionario)}</strong><span>${h(p.loja)}</span>
-        </div><button class="call" data-action="ligar" aria-label="Telefone indisponível">${icon('phone')} Ligar</button></div>
+        </div></div>
         <div class="timeline">${timeline}</div>
       </div>
       <aside class="tracking-side">
@@ -337,11 +329,11 @@ function tracking() {
       </aside>
     </section>
     <div class="tracking-actions">
-      <button class="secondary-btn" data-action="chat">${icon('bot')} Assistente IA</button>
-      <button class="secondary-btn" data-action="atualizar">${icon('refresh')} Atualizar</button>
+      <button class="secondary-btn" data-action="chat" aria-label="Falar com o assistente virtual do Lava Mais">${icon('message')} Falar com o lava-jato</button>
+      <button class="primary-btn" data-action="atualizar">${icon('refresh')} Atualizar</button>
     </div>
-    ${p.etapa < 5 ? `<button class="primary-btn stage-next" data-action="avancar">Avançar etapa (demo) ${icon('arrow')}</button>` : ''}
-    <p class="small-warning">O avanço é manual. Este aplicativo não rastreia funcionários nem veículos.</p>`;
+    ${p.etapa < 5 ? `<button class="stage-next" data-action="avancar" aria-label="Avançar etapa da demonstração">Avançar etapa de teste ${icon('arrow')}</button>` : ''}
+    <p class="small-warning">O botão de conversa abre o assistente virtual. Nenhuma mensagem é enviada a um lava-jato real. O acompanhamento é manual.</p>`;
 }
 function delivery() {
   const p = state.pedido;
