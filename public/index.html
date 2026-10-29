@@ -21,8 +21,8 @@
         </div>
         <h1>Seu veículo limpo.<br /><em>Seu tempo de volta.</em></h1>
         <p class="intro-description">
-          Uma experiência simples para explorar serviços de lavagem, simular agendamentos e
-          acompanhar cada etapa do atendimento.
+          As seis telas do Lava Mais em uma navegação interativa, com agendamento demonstrativo,
+          acompanhamento de pedidos e assistente de IA opcional.
         </p>
         <div class="intro-points">
           <p><span>01</span> Escolha o veículo e o serviço</p>
@@ -33,7 +33,7 @@
           <strong>Ambiente demonstrativo.</strong> Estabelecimentos, avaliações, preços e pedidos
           são fictícios. Nenhuma reserva real é realizada.
         </p>
-        <p class="intro-hint">Experimente o fluxo no aplicativo ao lado.</p>
+        <p class="intro-hint">Use a aba IA para conversar. Sem uma chave Groq, as respostas são demonstrativas.</p>
       </aside>
       <div class="phone" aria-label="Aplicativo demonstrativo Lava Mais">
         <div class="notch"></div>
@@ -69,6 +69,11 @@
               <button data-action="close-chat" class="icon-btn" aria-label="Fechar chat">×</button>
             </div>
             <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+            <div class="quick-questions" aria-label="Perguntas sugeridas">
+              <button type="button" data-action="pergunta-ia" data-prompt="Quais são os serviços e preços?">Preços</button>
+              <button type="button" data-action="pergunta-ia" data-prompt="Como funciona o agendamento?">Como agendar</button>
+              <button type="button" data-action="pergunta-ia" data-prompt="Como acompanhar meu pedido?">Meu pedido</button>
+            </div>
             <form id="chatForm" class="chat-form">
               <input
                 id="chatInput"
