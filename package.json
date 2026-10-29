@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "check": "node --check server.js && node --check public/app.js",
+    "check": "node --check server.js && node --check public/app.js && node --check public/pickup-location.js",
     "test": "node --test tests/*.test.js",
     "format": "prettier --write public/index.html public/app.css public/app.js server.js tests/api.test.js package.json README.md",
     "format:check": "prettier --check public/index.html public/app.css public/app.js server.js tests/api.test.js package.json README.md"
