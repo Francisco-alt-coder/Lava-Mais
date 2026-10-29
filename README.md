@@ -188,3 +188,22 @@ A geolocalização exige HTTPS ou `http://localhost` e permissão do usuário. S
 **Privacidade e limites:** coordenadas são enviadas ao OpenStreetMap somente depois da opção de localização ser acionada, para geocodificação e exibição do mapa. O acompanhamento é interrompido ao cancelar, fechar, salvar ou escolher o modo manual. As coordenadas não são persistidas pela interface; somente o texto confirmado do endereço integra o agendamento demonstrativo, enviado ao servidor na criação do pedido. Não existe rastreamento da frota nem garantia de precisão do endereço ou disponibilidade de serviço externo. Estabelecimentos e distâncias são fictícios.
 
 Arquivos envolvidos: `public/pickup-location.js`, `public/pickup-location.css`, `public/index.html` e o aviso de localização em `public/app.js`.
+
+## Versão web responsiva (sem moldura de celular)
+
+A interface agora é um site convencional que se adapta à largura da tela. No computador, o site apresenta cabeçalho, navegação, conteúdo explicativo, formulário de serviços e rodapé. No celular, mantém o fluxo visual aprovado para seleção de veículo, endereço e agendamento, sem moldura de telefone.
+
+**Endereço de retirada:** o campo começa vazio. Na janela de endereço, o usuário escolhe **Minha localização** (GPS, permissão do navegador, mapa e endereço aproximado) ou **Inserir manualmente**. O endereço deve ser confirmado antes do pedido. A visualização do mapa não representa a posição real do lava-jato.
+
+**Funcionalidade e limites:** a interface funciona como site web, mas a API continua usando estabelecimentos, preços e pedidos de exemplo, armazenados temporariamente em memória. Não há reserva comercial, cadastro real, pagamento, persistência permanente nem rastreamento dos veículos dos estabelecimentos. Para operação comercial, são necessárias integração com parceiros reais, banco de dados persistente, regras de disponibilidade, autenticação e validação dos fluxos com usuários.
+
+**Tecnologias preservadas:** HTML, CSS, JavaScript, Node.js e Express. Não foi adicionado framework. O arquivo `public/site.css` concentra o layout do site e `public/pickup-location.css` mantém as telas de retirada aprovadas.
+
+**Executar e conferir:**
+```bash
+npm ci
+npm run check
+npm test
+npm start
+```
+Acesse `http://localhost:3000/`. Para disponibilizar o GPS fora de `localhost`, é necessário HTTPS. A API pode ser hospedada com `NODE_ENV=production` e variável `PORT` fornecida pelo provedor.
