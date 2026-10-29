@@ -63,7 +63,7 @@ function enderecoAtual(cartao) {
 function abrirEndereco(cartao) {
   fecharObservacao();
   localizacao.ativo = true;
-  localizacao.modo = 'manual';
+  localizacao.modo = 'gps';
   localizacao.enderecoOriginal = enderecoAtual(cartao);
   modalEndereco.innerHTML = `
     <div class="modal-box pickup-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="pickupDescricao">
@@ -73,10 +73,10 @@ function abrirEndereco(cartao) {
       </div>
       <p id="pickupDescricao">Escolha como informar o endereço para a retirada do veículo.</p>
       <div class="pickup-tabs" role="group" aria-label="Forma de informar o endereço">
-        <button class="pickup-tab" type="button" data-pickup="modo" data-mode="gps" aria-pressed="false">⌖ Minha localização</button>
-        <button class="pickup-tab active" type="button" data-pickup="modo" data-mode="manual" aria-pressed="true">✎ Inserir manualmente</button>
+        <button class="pickup-tab active" type="button" data-pickup="modo" data-mode="gps" aria-pressed="true">⌖ Minha localização</button>
+        <button class="pickup-tab" type="button" data-pickup="modo" data-mode="manual" aria-pressed="false">✎ Inserir manualmente</button>
       </div>
-      <section id="pickupGps" class="pickup-panel hidden" aria-label="Localização atual">
+      <section id="pickupGps" class="pickup-panel" aria-label="Localização atual">
         <div class="pickup-intro">
           <div class="pickup-icon">⌖</div>
           <div><strong>Usar minha localização atual</strong><small>Autorize o navegador a identificar sua posição e preencher o endereço.</small></div>
@@ -87,23 +87,23 @@ function abrirEndereco(cartao) {
         <div id="pickupMapa" class="pickup-map hidden"></div>
         <small class="pickup-privacy">Seu GPS funciona apenas com autorização. Para descobrir a rua e mostrar o mapa, as coordenadas são enviadas ao OpenStreetMap. O rastreamento é encerrado ao fechar ou salvar.</small>
       </section>
-      <section id="pickupManual" class="pickup-panel" aria-label="Endereço informado manualmente">
+      <section id="pickupManual" class="pickup-panel hidden" aria-label="Endereço informado manualmente">
         <label for="modalAddress" class="pickup-label">Rua, número, bairro e cidade</label>
         <input id="modalAddress" class="field-input pickup-input" maxlength="180" autocomplete="street-address" value="${textoSeguro(localizacao.enderecoOriginal)}" placeholder="Ex.: Rua Exemplo, 123, Centro, Balsas - MA" />
         <small class="pickup-help">Confira o endereço antes de salvar. Você pode usar um endereço fictício na demonstração.</small>
       </section>
-      <div id="pickupEnderecoGps" class="pickup-gps-result hidden">
+      <div id="pickupEnderecoGps" class="pickup-gps-result">
         <label class="pickup-label" for="pickupAddressGps">Endereço identificado (confira antes de salvar)</label>
         <input id="pickupAddressGps" class="field-input pickup-input" maxlength="180" readonly placeholder="Aguardando sua localização..." />
         <button class="pickup-link" type="button" data-pickup="modo" data-mode="manual">Corrigir endereço manualmente</button>
       </div>
       <div class="buttons pickup-actions">
         <button class="secondary-btn" type="button" data-action="fechar-modal">Cancelar</button>
-        <button class="primary-btn" type="button" data-action="salvar-modal" id="pickupSalvar">Salvar</button>
+        <button class="primary-btn" type="button" data-action="salvar-modal" id="pickupSalvar" disabled>Salvar</button>
       </div>
     </div>`;
   modalEndereco.classList.remove('hidden');
-  campo('modalAddress').focus();
+  modalEndereco.querySelector('[data-pickup="localizar"]').focus();
 }
 
 function mudarModo(modo) {
