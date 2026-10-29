@@ -95,7 +95,7 @@ const state = {
   estabelecimentos: [],
   servico: 'simples',
   retirada: true,
-  endereco: 'Rua das Flores, 123, Bairro Centro - Cidade/UF',
+  endereco: '',
   data: amanha(),
   horario: '10:00',
   horarios: [],
@@ -550,6 +550,10 @@ document.addEventListener('click', async (event) => {
       return;
     }
     if (action === 'confirmar-pedido') {
+      if (state.endereco.trim().length < 8) {
+        notify('Informe o endereço de retirada antes de confirmar.');
+        return;
+      }
       // O navegador envia as escolhas; a API valida o horário e calcula o valor final.
       btn.disabled = true;
       try {
