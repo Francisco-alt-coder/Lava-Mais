@@ -1,0 +1,195 @@
+/* Complemento da interface aprovada: endereço manual e localização por GPS. */
+.pickup-box {
+  max-height: min(94%, 790px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.pickup-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.pickup-heading h2 {
+  margin: 0 0 9px;
+  font-size: 22px;
+}
+.pickup-close {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: #174276;
+  font-size: 29px;
+  line-height: 1;
+  padding: 0 3px;
+}
+.pickup-tabs {
+  display: flex;
+  background: #edf3fa;
+  padding: 3px;
+  border-radius: 13px;
+  gap: 3px;
+  margin: 15px 0;
+}
+.pickup-tab {
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #23436d;
+  padding: 11px 6px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+.pickup-tab.active {
+  color: #0860ed;
+  background: white;
+  border-color: #2572ff;
+  box-shadow: 0 1px 5px #071f4320;
+}
+.pickup-panel {
+  border: 1px solid #e1ebf5;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 6px 18px #15275609;
+}
+.pickup-intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.pickup-icon {
+  flex: 0 0 47px;
+  height: 47px;
+  line-height: 47px;
+  text-align: center;
+  font-size: 27px;
+  font-weight: 900;
+  border-radius: 50%;
+  color: #0860ed;
+  background: #eaf2ff;
+}
+.pickup-intro strong {
+  display: block;
+  font-size: 14px;
+}
+.pickup-intro small {
+  display: block;
+  color: #64799a;
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+.pickup-locate {
+  width: 100%;
+  font-size: 13px;
+  padding: 13px 9px;
+  min-height: 48px;
+}
+.pickup-box .pickup-status {
+  border-radius: 9px;
+  background: #ecfff7;
+  color: #146946;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 12px 0 0;
+}
+.pickup-box .pickup-status[data-erro='true'] {
+  background: #fff0ed;
+  color: #9d2f25;
+}
+.pickup-box .pickup-coords {
+  color: #496483;
+  margin: 10px 0;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.pickup-map {
+  height: 156px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 12px;
+  border: 1px solid #d6e4f2;
+  position: relative;
+  background: #eaf3f9;
+}
+.pickup-map iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.pickup-map span {
+  position: absolute;
+  left: 5px;
+  bottom: 3px;
+  background: #ffffffde;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 9px;
+  color: #3f5d7a;
+}
+.pickup-privacy {
+  display: block;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 9px;
+  color: #54718d;
+  background: #f0f8fc;
+  line-height: 1.45;
+  font-size: 11px;
+}
+.pickup-label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #17365d;
+}
+.pickup-input {
+  width: 100%;
+  padding: 12px 10px;
+  font-size: 13px;
+  border: 1px solid #c6d8e8;
+  border-radius: 11px;
+  color: #153761;
+}
+.pickup-input:focus {
+  border-color: #16a6bf;
+  outline: 2px solid #16a6bf33;
+}
+.pickup-help {
+  display: block;
+  color: #607493;
+  margin-top: 9px;
+  line-height: 1.45;
+  font-size: 11px;
+}
+.pickup-gps-result {
+  padding: 13px 0 0;
+}
+.pickup-link {
+  border: 0;
+  background: none;
+  color: #075ad8;
+  font-weight: 800;
+  padding: 10px 0 0;
+  font-size: 12px;
+}
+.pickup-box .pickup-actions {
+  display: flex;
+  margin-top: 16px;
+  gap: 10px;
+}
+.pickup-box .pickup-actions button {
+  flex: 1;
+  min-height: 47px;
+  padding: 10px 6px;
+  border-radius: 11px;
+}
+@media (max-width: 375px) {
+  .pickup-box { padding: 18px 14px 22px; }
+  .pickup-tab { font-size: 11px; padding: 10px 4px; }
+}
