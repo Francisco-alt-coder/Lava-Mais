@@ -345,8 +345,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       ? requestedPort
       : 3000;
   const hostArg = process.argv.indexOf('--host');
-  // Por padrão, o protótipo atende somente neste computador.
-  const host = hostArg >= 0 ? process.argv[hostArg + 1] : '127.0.0.1';
+  // Localmente fica restrito ao computador; em hospedagem aceita conexões externas.
+  const host = hostArg >= 0
+    ? process.argv[hostArg + 1]
+    : process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
   createApp().listen(port, host, () =>
     console.log(
       `Lava Mais em http://localhost:${port} · chatbot: ${process.env.GROQ_API_KEY?.trim() ? 'Groq' : 'demonstração local'}`,
