@@ -64,7 +64,7 @@ function abrirEndereco(cartao) {
   fecharObservacao();
   localizacao.ativo = true;
   localizacao.modo = 'gps';
-  localizacao.enderecoOriginal = enderecoAtual(cartao);
+  localizacao.enderecoOriginal = enderecoAtual(cartao).startsWith('Definir endereço') ? '' : enderecoAtual(cartao);
   modalEndereco.innerHTML = `
     <div class="modal-box pickup-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="pickupDescricao">
       <div class="pickup-heading">
@@ -90,7 +90,7 @@ function abrirEndereco(cartao) {
       <section id="pickupManual" class="pickup-panel hidden" aria-label="Endereço informado manualmente">
         <label for="modalAddress" class="pickup-label">Rua, número, bairro e cidade</label>
         <input id="modalAddress" class="field-input pickup-input" maxlength="180" autocomplete="street-address" value="${textoSeguro(localizacao.enderecoOriginal)}" placeholder="Ex.: Rua Exemplo, 123, Centro, Balsas - MA" />
-        <small class="pickup-help">Confira o endereço antes de salvar. Você pode usar um endereço fictício na demonstração.</small>
+        <small class="pickup-help">Confira rua, número, bairro e cidade antes de continuar.</small>
       </section>
       <div id="pickupEnderecoGps" class="pickup-gps-result">
         <label class="pickup-label" for="pickupAddressGps">Endereço identificado (confira antes de salvar)</label>
@@ -191,7 +191,7 @@ function atualizarPosicao(posicao) {
   const lon = posicao.coords.longitude;
   const precisao = Math.round(posicao.coords.accuracy);
   campo('pickupCoords').textContent =
-    'Localização em tempo real · precisão estimada de ' + precisao + ' m · ' +
+    'Posição do dispositivo · precisão estimada de ' + precisao + ' m · ' +
     lat.toFixed(5) + ', ' + lon.toFixed(5);
   campo('pickupCoords').classList.remove('hidden');
 
