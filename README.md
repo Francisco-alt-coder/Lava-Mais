@@ -174,3 +174,17 @@ Os comentários nos arquivos explicam **como** e **por que** as funções foram 
 | Contribuição da IA                | Comentários explicativos, ajustes de horários e interface, documentação e apoio à publicação     |
 | Validações e correções dos alunos | [inserir responsáveis, testes manuais e modificações reais]                                      |
 | Evidências preservadas            | Histórico de commits, conversas, testes automatizados e versões anteriores recuperáveis pelo Git |
+
+
+## Endereço de retirada: GPS e preenchimento manual
+
+Na tela **Início > Sua localização**, o usuário escolhe entre:
+
+1. **Inserir manualmente**: editar rua, número, bairro e cidade. Essa opção não depende do GPS.
+2. **Minha localização**: clicar em **Usar minha localização atual** para pedir autorização ao navegador. Enquanto a janela estiver aberta, a posição é atualizada por `navigator.geolocation.watchPosition()`. O serviço OpenStreetMap/Nominatim tenta identificar o endereço, que deve ser conferido antes de salvar.
+
+A geolocalização exige HTTPS ou `http://localhost` e permissão do usuário. Se a permissão for negada, se o aparelho não possuir localização ou se o serviço de endereço falhar, utilize o preenchimento manual.
+
+**Privacidade e limites:** coordenadas são enviadas ao OpenStreetMap somente depois da opção de localização ser acionada, para geocodificação e exibição do mapa. O acompanhamento é interrompido ao cancelar, fechar, salvar ou escolher o modo manual. As coordenadas não são persistidas pela interface; somente o texto confirmado do endereço integra o agendamento demonstrativo, enviado ao servidor na criação do pedido. Não existe rastreamento da frota nem garantia de precisão do endereço ou disponibilidade de serviço externo. Estabelecimentos e distâncias são fictícios.
+
+Arquivos envolvidos: `public/pickup-location.js`, `public/pickup-location.css`, `public/index.html` e o aviso de localização em `public/app.js`.
