@@ -6,6 +6,35 @@ Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A 
 
 **Etapa acadêmica:** protótipo de interface integrado a uma API. A correspondência com uma TED específica, os requisitos aprovados e a validação de um cliente ainda precisam ser informados pela equipe.
 
+## Revisão visual das seis telas aprovadas (proposta em branch)
+
+A branch `feat/telas-aprovadas-assistente-ia` adapta a apresentação da versão 2.2.0 aos seis exemplos visuais fornecidos pela equipe:
+
+- **Início:** identidade azul, seleção de carro/moto, endereço fictício e atalho para IA.
+- **Lava-jatos próximos:** cartões e filtros de veículo; distâncias e notas continuam fictícias.
+- **Detalhes:** seleção de lavagem simples/completa e retirada/devolução.
+- **Agendamento:** data, lista de horários, bloqueio de horário indisponível e total calculado pela API.
+- **Acompanhamento:** linha do tempo, estado demonstrativo, atualização e acesso ao assistente.
+- **Entrega:** resumo, avaliação por estrelas, confirmação e relato de problema.
+
+O assistente aparece na aba **IA**, no início e na tela de acompanhamento.
+Sem `GROQ_API_KEY`, oferece respostas locais demonstrativas; com chave válida, o servidor tenta consultar a Groq.
+As perguntas rápidas `Preços`, `Como agendar` e `Meu pedido` ajudam a começar a conversa.
+O navegador **nunca** deve receber a chave da API.
+
+### Validação da proposta
+
+1. Execute `npm ci`, `npm run check`, `npm test` e `npm start`.
+2. Abra `http://localhost:3000`; percorra Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega.
+3. Selecione uma data futura e um horário disponível; **10:00** permanece bloqueado.
+4. Clique na aba **IA** e confirme a resposta demonstrativa; teste separadamente a Groq com uma chave válida, se a equipe a tiver configurado.
+5. Faça inspeção visual em tela pequena (320/375 px), tablet e desktop.
+6. Peça aprovação da equipe antes de incorporar a branch à `main`.
+
+**Limitações:** não existe serviço real, autenticação, persistência em banco, rastreamento do motorista ou previsão real de chegada. A inspeção visual no navegador, a integração Groq com credencial real e a validação da equipe ainda devem ser documentadas.
+
+---
+
 ## Funcionalidades demonstradas
 
 1. **Início:** escolha entre carro e moto e edição de endereço fictício.
