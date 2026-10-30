@@ -412,6 +412,8 @@ function navigate(dest) {
   state.screen = dest;
   render();
   $('#page').scrollTop = 0;
+  // Em desktop, a rolagem é do documento inteiro.
+  if (typeof window !== 'undefined' && window.scrollY > 0) window.scrollTo(0, 0);
 }
 // Consulta o servidor sempre que o estabelecimento ou a data mudam.
 function loadSlots() {
