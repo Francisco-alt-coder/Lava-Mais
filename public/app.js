@@ -709,14 +709,31 @@ document.addEventListener('click', async (event) => {
       return;
     }
     if (action === 'endereco') {
-      modal('Endereço de retirada', 'Use um endereço fictício para testar o agendamento.');
-      $('#modal')
-        .querySelector('p')
-        .insertAdjacentHTML(
-          'afterend',
-          `<input id="modalAddress" aria-label="Endereço demonstrativo" class="field-input" maxlength="180" value="${h(state.endereco)}" style="margin-bottom:13px"/>`,
-        );
-      $('#modalAddress').focus();
+      openAddressModal();
+      return;
+    }
+    if (action === 'endereco-modo') {
+      if (btn.dataset.mode === 'manual') {
+        stopLocationWatch();
+        locationDraft.mode='manual';
+        renderAddressModal();
+        $('#modalAddress')?.focus();
+      } else {
+        locationDraft.mode='gps';
+        renderAddressModal();
+      }
+      return;
+    }
+    if (action === 'localizacao-atual') {
+      startLocationWatch();
+      return;
+    }
+    if (action === 'endereco-editar') {
+      stopLocationWatch();
+      locationDraft.mode='manual';
+      locationDraft.manual=locationDraft.address||locationDraft.manual;
+      renderAddressModal();
+      $('#modalAddress')?.focus();
       return;
     }
     if (action === 'ir-agendamento') {
@@ -826,6 +843,19 @@ document.addEventListener('click', async (event) => {
       closeModal();
       return;
     }
+    if (action === 'salvar-modal' && $('#modal').dataset.mode==='endereco') {
+      const address=locationDraft.mode==='manual'
+        ? ($('#modalAddress')?.value||'').trim()
+        : locationDraft.address.trim();
+      if(address.length<8||address.length>180) {
+        notify('Informe um endereço válido com rua, número e cidade.');return;
+      }
+      state.endereco=address;
+      closeModal();
+      render();
+      notify('Endereço de retirada atualizado. Confira antes de continuar.');
+      return;
+    }
     if (action === 'salvar-modal') {
       const address = $('#modalAddress');
       if (address) {
@@ -857,6 +887,11 @@ document.addEventListener('click', async (event) => {
     }
   } catch (e) {
     notify(e.message);
+  }
+});
+document.addEventListener('input', (e) => {
+  if(e.target.id==='modalAddress' && $('#modal').dataset.mode==='endereco') {
+    locationDraft.manual=e.target.value;
   }
 });
 document.addEventListener('change', async (e) => {
