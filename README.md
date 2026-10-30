@@ -1,47 +1,8 @@
 # Lava Mais · Projeto acadêmico
 
-Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A aplicação permite explorar serviços de lavagem de veículos e simular agendamento, retirada, acompanhamento e entrega. O foco desta versão é apresentar um fluxo completo e compreensível, com HTML, CSS, JavaScript e uma API simples.
+**Programação para Web** (ADS, 2026.2). A aplicação permite explorar serviços de lavagem de veículos e simular agendamento, retirada, acompanhamento e entrega. O foco desta versão é apresentar um fluxo completo e compreensível, com HTML, CSS, JavaScript e uma API simples.
 
-> **Status: demonstração.** Os lava-jatos, funcionários, avaliações, distâncias, valores e pedidos são fictícios. Nenhum serviço é contratado de verdade.
 
-**Etapa acadêmica:** protótipo de interface integrado a uma API. A correspondência com uma TED específica, os requisitos aprovados e a validação de um cliente ainda precisam ser informados pela equipe.
-
-## Revisão visual das seis telas aprovadas (proposta em branch)
-
-Referência visual: seis capturas aprovadas pela equipe (Início, Lava-jatos próximos, Detalhes, Agendamento, Acompanhar pedido e Entrega do veículo). A implementação usa elementos HTML interativos, não imagens estáticas no lugar dos botões.
-
-As seis telas da interface foram construídas a partir dos exemplos visuais aprovados pela equipe:
-
-- **Início:** identidade azul, seleção de carro/moto e endereço fictício, sem elementos extras sobre o desenho aprovado.
-- **Lava-jatos próximos:** cartões e filtros de veículo; distâncias e notas continuam fictícias.
-- **Detalhes:** seleção de lavagem simples/completa e retirada/devolução.
-- **Agendamento:** data, lista de horários, bloqueio de horário indisponível e total calculado pela API.
-- **Acompanhamento:** linha do tempo, estado demonstrativo, atualização e acesso ao assistente.
-- **Entrega:** resumo, avaliação por estrelas, confirmação e relato de problema.
-
-**Navegação atualizada após revisão da equipe:** a barra inferior do celular apresenta **Início, Pedidos, Perfil e Assistente IA**, nessa ordem. No desktop, as mesmas quatro opções ficam no menu horizontal superior. A aba IA abre o chat sem perder a tela atual. O assistente também continua acessível por **Falar com o lava-jato** no acompanhamento e pelo Perfil. Esse botão abre um assistente virtual, não conversa com um estabelecimento real.
-Sem `GROQ_API_KEY`, oferece respostas locais demonstrativas; com chave válida, o servidor tenta consultar a Groq.
-As perguntas rápidas `Preços`, `Como agendar` e `Meu pedido` ajudam a começar a conversa.
-O navegador **nunca** deve receber a chave da API.
-
-### Endereço de retirada e localização atual
-
-Ao clicar em **Sua localização**, abre-se uma janela responsiva com duas opções:
-**Minha localização** ou **Inserir manualmente**.
-
-- A localização real **só é solicitada após clicar em "Usar minha localização atual"** e depende de permissão do navegador, em HTTPS ou localhost.
-- Quando autorizada, a API de geolocalização do navegador acompanha a posição **somente enquanto a janela estiver aberta**, encerrando ao fechar/salvar ou trocar para entrada manual.
-- Uma consulta de geocodificação reversa ao serviço público **Photon (Komoot)** tenta sugerir rua/bairro/cidade. Não há garantia de número exato; quando não informado, é exigida confirmação manual. O resultado pode conter imprecisões.
-- O mapa usa dados OpenStreetMap após a autorização. O navegador envia coordenadas a esses fornecedores para apresentar o mapa/endereço, com aviso de privacidade na interface.
-- O Lava Mais não salva latitude/longitude e envia somente uma descrição genérica do endereço para a API pública de pedidos. O endereço escolhido pelo usuário fica na interface enquanto a página permanece aberta. Recarregar pode fazer o acompanhamento mostrar essa descrição genérica.
-- Se GPS, permissões, mapa ou geocodificação falharem, **Inserir manualmente** continua disponível.
-- As distâncias e os estabelecimentos cadastrados são ilustrativos, sem recálculo geográfico. Não existe retirada real contratada pelo site.
-
-O Photon é uma API de demonstração, sujeita a limites de uso e sem garantia de disponibilidade. Para produção com pedidos reais, é necessário contratar/prover serviço de geocodificação apropriado e implementar autorização e persistência segura. Documentação: https://github.com/komoot/photon e https://github.com/komoot/photon/blob/master/docs/api-v1.md.
-
-### Assistente virtual
-
-O assistente oferece respostas automáticas úteis sobre serviços, preços, horários, endereço e acompanhamento, sem exibir instruções de variáveis de ambiente. A integração com a **Groq** já existente continua opcional e limitada ao servidor. **Neste serviço Render, sem credencial configurada, o assistente responde por regras locais**, não por modelo de IA generativa. Isso evita apresentar uma integração externa como ativa sem validação.
 
 ### Validação da proposta
 
@@ -56,7 +17,7 @@ O assistente oferece respostas automáticas úteis sobre serviços, preços, hor
 
 ---
 
-## Funcionalidades demonstradas
+## Funcionalidades 
 
 1. **Início:** escolha entre carro e moto e edição de endereço fictício.
 2. **Lava-jatos:** catálogo demonstrativo, filtros e preços para cada veículo.
@@ -88,7 +49,7 @@ Não são necessários React, banco de dados ou ferramentas de compilação para
 4. `server.js` cria as rotas do Express, valida os pedidos, calcula preços e guarda os pedidos temporariamente em memória.
 5. `tests/api.test.js` executa chamadas HTTP automatizadas, verificando os principais comportamentos da API.
 
-**Fluxo para demonstrar em sala:** Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega. Selecione um horário livre; 10:00 fica bloqueado intencionalmente.
+**Fluxo em sala:** Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega. Selecione um horário livre; 10:00 fica bloqueado intencionalmente.
 
 ## Requisitos e execução
 
@@ -105,7 +66,7 @@ npm start
 
 No PowerShell, substitua o comando de cópia por `Copy-Item .env.example .env`. O arquivo `iniciar.bat` também pode iniciar a demonstração no Windows.
 
-Depois, acesse **http://localhost:3000**. Para desenvolvimento com reinicialização automática, use `npm run dev`. Por segurança, o servidor inicia acessível somente neste computador (`127.0.0.1`).
+Depois, acesse **http://localhost:3000**. Para desenvolvimento com reinicialização automática, use `npm run dev`. Por segurança, o servidor inicia acessível somente computador (`127.0.0.1`).
 
 ### Variáveis de ambiente
 
@@ -115,7 +76,7 @@ Depois, acesse **http://localhost:3000**. Para desenvolvimento com reinicializa�
 | `GROQ_API_KEY` | Não          | Chave de API, somente no servidor                              |
 | `GROQ_MODEL`   | Não          | Modelo enviado à Groq; consulte o modelo padrão em `server.js` |
 
-O arquivo `.env.example` não contém credenciais. **Nunca publique `.env`, tokens ou dados pessoais no GitHub.** Sem chave, o chatbot utiliza respostas demonstrativas. Uma chave configurada não prova, sozinha, que a integração real está funcionando.
+O arquivo `.env.example` não contém credenciais. **Nunca publique `.env`, tokens ou dados pessoais no GitHub.** Sem chave, o chatbot utiliza respostas demonstrativas. Uma chave configurada não prova, sozinha, que a integração re
 
 Para testar a Groq, informe sua própria chave em `GROQ_API_KEY` no arquivo `.env` local e reinicie o servidor. O chatbot identifica se a resposta veio da Groq ou do modo demonstrativo. A chave deve permanecer somente no servidor e não deve ser publicada.
 
