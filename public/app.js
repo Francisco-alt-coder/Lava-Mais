@@ -453,6 +453,129 @@ async function loadPedido() {
   render();
   return true;
 }
+function stopLocationWatch() {
+  locationDraft.requestToken++;
+  if (locationDraft.watchId !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
+    navigator.geolocation.clearWatch(locationDraft.watchId);
+  }
+  locationDraft.watchId = null;
+}
+
+function openAddressModal() {
+  stopLocationWatch();
+  Object.assign(locationDraft, {mode:'gps',manual:state.endereco,address:'',lat:null,lon:null,accuracy:null,status:'idle',error:'',reverseStarted:false,lastUpdate:'',lastMapLat:null,lastMapLon:null});
+  $('#modal').dataset.mode = 'endereco';
+  $('#modal').classList.remove('hidden');
+  renderAddressModal();
+  $('#modal').querySelector('[data-action="localizacao-atual"]')?.focus();
+}
+
+function mapUrl(lat, lon) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat)>90 || Math.abs(lon)>180) return '';
+  const bbox = [lon-.0045,lat-.0035,lon+.0045,lat+.0035].map(v=>v.toFixed(5)).join(',');
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${lat.toFixed(6)}%2C${lon.toFixed(6)}`;
+}
+
+function renderAddressModal() {
+  const el=$('#modal');
+  if (el.dataset.mode !== 'endereco') return;
+  const gps=locationDraft.mode === 'gps';
+  const positioned=Number.isFinite(locationDraft.lat)&&Number.isFinite(locationDraft.lon);
+  const text=locationDraft.error || (locationDraft.status==='loading' ? 'Aguardando sua permissão e consultando o endereço...' : `Localização obtida às ${locationDraft.lastUpdate}. Confira antes de salvar.`);
+  const body=gps?`<div class="location-choice">
+    <div class="location-choice-title">${icon('pin')}<div><strong>Usar minha localização atual</strong>
+       <p>Permita o acesso à sua posição para sugerir um endereço de retirada.</p></div></div>
+    <button type="button" class="primary-btn location-detect" data-action="localizacao-atual">
+       ${icon('pin')} ${locationDraft.status==='loading'?'Localizando...':positioned?'Atualizar localização':'Usar minha localização atual'}
+    </button>
+    ${locationDraft.status!=='idle'?`<div class="gps-status ${locationDraft.error?'has-error':''}" role="status">${icon(locationDraft.error?'alert':'check')}<span>${h(text)}</span></div>`:''}
+    ${positioned?`<div class="location-map"><iframe loading="lazy" title="Mapa da localização atual" referrerpolicy="no-referrer" src="${mapUrl(locationDraft.lat,locationDraft.lon)}"></iframe></div>
+    <div class="gps-address">${icon('pin')}<div><strong>${h(locationDraft.address || 'Localização encontrada. Confirme o endereço.')}</strong>
+      <small>Precisão aproximada: ${Math.round(locationDraft.accuracy||0)} m. Verifique rua e número.</small></div>
+      <button type="button" data-action="endereco-editar" aria-label="Editar endereço sugerido">${icon('chevron')} Editar</button></div>`:''}
+    <div class="location-privacy">${icon('shield')}<span>Somente com sua permissão: a posição é enviada ao Photon/OpenStreetMap para sugerir o endereço e mostrar o mapa. O Lava Mais não guarda suas coordenadas.</span></div>
+  </div>`:`<div class="location-choice"><label for="modalAddress" class="location-manual-label">Endereço de retirada</label>
+      <input id="modalAddress" class="field-input" autocomplete="street-address" maxlength="180" placeholder="Rua, número, bairro, cidade e estado" value="${h(locationDraft.manual)}">
+      <small class="location-help">Confira rua, número, bairro e cidade antes de salvar.</small></div>`;
+  el.innerHTML=`<div class="modal-box location-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="location-modal-heading"><h2 id="modalTitle">Endereço de retirada</h2>
+      <button type="button" data-action="fechar-modal" class="location-close" aria-label="Fechar">${icon('close')}</button></div>
+    <p class="location-intro">Use um endereço para agendar a retirada do seu veículo.</p>
+    <div class="location-switch" role="group" aria-label="Forma de informar o endereço">
+      <button type="button" class="${gps?'selected':''}" data-action="endereco-modo" data-mode="gps" aria-pressed="${gps}">${icon('pin')} Minha localização</button>
+      <button type="button" class="${!gps?'selected':''}" data-action="endereco-modo" data-mode="manual" aria-pressed="${!gps}">${icon('message')} Inserir manualmente</button>
+    </div>
+    <div aria-live="polite">${body}</div>
+    <div class="location-buttons"><button type="button" class="secondary-btn" data-action="fechar-modal">Cancelar</button>
+      <button type="button" class="primary-btn" data-action="salvar-modal" ${gps&&!locationDraft.address?'disabled':''}>Salvar</button></div>
+    </div>`;
+}
+
+function locationError(error) {
+  if ($('#modal').dataset.mode !== 'endereco' || locationDraft.mode!=='gps') return;
+  locationDraft.status='error';
+  locationDraft.error=error?.code===1?'Localização não autorizada. Use Inserir manualmente.':error?.code===2?
+    'O navegador não conseguiu identificar sua posição. Insira o endereço manualmente.':
+    'Não foi possível obter sua posição. Tente novamente ou insira o endereço.';
+  renderAddressModal();
+}
+
+async function geocodePosition(lat,lon,token) {
+  try {
+    // Apenas uma consulta após solicitação explícita, sem geocodificação periódica.
+    const url=`https://photon.komoot.io/reverse?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&limit=1`;
+    const result=await fetch(url,{headers:{Accept:'application/json'}});
+    if (!result.ok) throw Error('Serviço de endereço indisponível');
+    const j=await result.json();
+    if (token!==locationDraft.requestToken || $('#modal').dataset.mode!=='endereco') return;
+    const p=j?.features?.[0]?.properties||{};
+    const street=p.street || (p.osm_key==='highway'?p.name:'');
+    const city=p.city||p.town||p.locality||p.county||'';
+    const address=[[street,p.housenumber].filter(Boolean).join(', '),p.district||p.suburb||'',[city,p.state].filter(Boolean).join(' - ')].filter(Boolean).join(', ');
+    locationDraft.manual=address.slice(0,180);
+    if (street && address.length>=8) {
+      locationDraft.address=locationDraft.manual;
+      if (!p.housenumber) locationDraft.error='Número não identificado. Toque em Editar para completar antes de salvar.';
+    } else {
+      locationDraft.error='Posição identificada, mas sem rua completa. Toque em Editar para informar o endereço.';
+    }
+  } catch {
+    if(token===locationDraft.requestToken) locationDraft.error='Localização obtida, mas o endereço não pôde ser consultado. Insira manualmente.';
+  } finally {
+    if(token===locationDraft.requestToken && $('#modal').dataset.mode==='endereco') {
+      locationDraft.status='ready';
+      renderAddressModal();
+    }
+  }
+}
+
+function startLocationWatch() {
+  if ($('#modal').dataset.mode!=='endereco') return;
+  if (typeof navigator==='undefined'||!navigator.geolocation) {
+    locationError({code:2});return;
+  }
+  stopLocationWatch();
+  const token=locationDraft.requestToken;
+  Object.assign(locationDraft,{status:'loading',error:'',address:'',reverseStarted:false,lat:null,lon:null,lastMapLat:null,lastMapLon:null});
+  renderAddressModal();
+  locationDraft.watchId=navigator.geolocation.watchPosition((pos)=>{
+    if(token!==locationDraft.requestToken || locationDraft.mode!=='gps') return;
+    const {latitude,longitude,accuracy}=pos.coords;
+    if(!Number.isFinite(latitude)||!Number.isFinite(longitude))return;
+    const moved=locationDraft.lastMapLat===null||Math.abs(latitude-locationDraft.lastMapLat)>.0005||Math.abs(longitude-locationDraft.lastMapLon)>.0005;
+    locationDraft.lat=latitude;locationDraft.lon=longitude;locationDraft.accuracy=accuracy;
+    locationDraft.lastUpdate=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    if(!locationDraft.reverseStarted){
+      locationDraft.reverseStarted=true;
+      locationDraft.lastMapLat=latitude;locationDraft.lastMapLon=longitude;
+      renderAddressModal();geocodePosition(latitude,longitude,token);
+    }else if(moved){
+      locationDraft.lastMapLat=latitude;locationDraft.lastMapLon=longitude;
+      renderAddressModal();
+    }
+  },locationError,{enableHighAccuracy:true,maximumAge:20000,timeout:15000});
+}
+
 function modal(title, description, withText = false) {
   $('#modal').innerHTML =
     `<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><h2 id="modalTitle">${h(title)}</h2><p>${h(description)}</p>${withText ? '<textarea id="modalText" aria-label="Descrição do problema" placeholder="Descreva brevemente o problema..." maxlength="500"></textarea>' : ''}<div class="buttons"><button class="secondary-btn" data-action="fechar-modal">Cancelar</button><button class="primary-btn" data-action="salvar-modal">${withText ? 'Enviar' : 'Salvar'}</button></div></div>`;
@@ -460,8 +583,12 @@ function modal(title, description, withText = false) {
   $('#modal').querySelector('textarea,button')?.focus();
 }
 function closeModal() {
+  stopLocationWatch();
   $('#modal').classList.add('hidden');
+  $('#modal').dataset.mode = '';
   $('#modal').innerHTML = '';
+  locationDraft.lat = null;
+  locationDraft.lon = null;
 }
 function openChat() {
   state.chatOpen = true;
