@@ -2002,3 +2002,102 @@ p {
   .tab svg { width: 18px; height: 18px; }
   .home-hero { border-radius: 15px; }
 }
+
+
+/* Endereço de retirada: duas formas de preenchimento, GPS e manual. */
+.modal-container { z-index: 40; }
+.modal-container:has(.location-modal) { align-items: center; padding: 16px; }
+.location-modal {
+  width: min(590px, 100%);
+  max-height: min(740px, calc(100dvh - 32px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px 26px 26px;
+  box-shadow: 0 22px 60px rgba(8, 29, 60, .18);
+}
+.location-modal-heading { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.location-modal-heading h2 { margin: 0; font-size: 23px; color: #102c51; }
+.location-close {
+  width: 39px; height: 39px; border: 0; border-radius: 50%;
+  background: #f1f5fb; color: #183e63; display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.location-close svg { width: 19px; height: 19px; }
+.location-modal .location-intro { margin: 12px 0 19px; font-size: 14px; line-height: 1.5; color: #5f7693; }
+.location-switch {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 5px; gap: 5px; background: #eef3fb; border-radius: 13px;
+  margin-bottom: 18px;
+}
+.location-switch button {
+  border: 1px solid transparent; border-radius: 10px; background: transparent;
+  min-width: 0; min-height: 48px; padding: 9px 5px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; color: #254564; font-size: 12px; font-weight: 800;
+}
+.location-switch button.selected {
+  background: #fff; border-color: #2b79f1; color: #0860d4;
+  box-shadow: 0 2px 10px #1556a412;
+}
+.location-switch button svg { width: 17px; height: 17px; }
+.location-choice {
+  border: 1px solid #e3eaf3; border-radius: 16px; padding: 16px;
+  background: #fff;
+}
+.location-choice-title { display: flex; align-items: flex-start; gap: 12px; }
+.location-choice-title > svg {
+  width: 38px; height: 38px; padding: 9px; border-radius: 50%;
+  background: #e9f2ff; color: #1766dc;
+}
+.location-choice-title strong { display: block; font-size: 16px; }
+.location-choice-title p { margin: 7px 0 0; font-size: 13px; }
+.location-detect { margin: 18px 0 13px; min-height: 50px; font-size: 14px; }
+.gps-status {
+  background: #e4f8ef; border: 1px solid #cfebdf; border-radius: 11px;
+  padding: 12px; display: flex; gap: 9px; align-items: flex-start;
+  color: #116b51; font-size: 12px; line-height: 1.5;
+}
+.gps-status.has-error { background: #fff1f2; border-color: #ffd0d6; color: #a82d49; }
+.gps-status svg { width: 19px; height: 19px; flex-shrink: 0; }
+.location-map { overflow: hidden; border-radius: 12px; margin: 12px 0; border: 1px solid #dce6f0; background: #eaf3fa; }
+.location-map iframe { display: block; width: 100%; height: 185px; border: 0; }
+.gps-address { display: flex; align-items: flex-start; gap: 10px; background: #f5f9ff; border: 1px solid #e2ebf6; border-radius: 11px; padding: 11px 12px; }
+.gps-address > svg { width: 18px; height: 18px; color: #1766dc; flex-shrink: 0; margin-top: 2px; }
+.gps-address > div { flex: 1; min-width: 0; }
+.gps-address strong { font-size: 13px; display: block; overflow-wrap: anywhere; }
+.gps-address small { font-size: 11px; display: block; color: #7185a0; line-height: 1.4; margin-top: 5px; }
+.gps-address button {
+  color: #1766dc; background: transparent; border: 0; font-size: 12px;
+  font-weight: 800; display: flex; align-items: center; gap: 3px;
+}
+.gps-address button svg { width: 15px; height: 15px; }
+.location-privacy {
+  display: flex; gap: 10px; padding: 13px; background: #eef7ff;
+  margin-top: 13px; border-radius: 11px; color: #4d6d8f;
+  font-size: 11px; line-height: 1.55;
+}
+.location-privacy svg { width: 20px; height: 20px; color: #1766dc; flex-shrink: 0; }
+.location-manual-label { display: block; font-weight: 800; font-size: 14px; margin-bottom: 9px; }
+.location-choice .field-input { box-shadow: none; }
+.location-help { color: #6b829c; display: block; margin-top: 9px; font-size: 12px; line-height: 1.4; }
+.location-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 20px; }
+.location-buttons button { min-height: 48px; font-size: 14px; }
+@media (max-width: 820px) {
+  .modal-container:has(.location-modal) { align-items: flex-end; padding: 0; }
+  .location-modal {
+    width: 100%; max-height: min(88dvh, 810px);
+    border-radius: 24px 24px 0 0;
+    padding: 21px 18px calc(22px + env(safe-area-inset-bottom));
+  }
+  .location-modal-heading h2 { font-size: 20px; }
+  .location-switch button { font-size: 11px; }
+  .location-choice { padding: 13px; }
+  .location-map iframe { height: 155px; }
+}
+@media (max-width: 360px) {
+  .location-switch button { font-size: 10px; gap: 3px; }
+  .location-switch button svg { width: 15px; }
+  .location-modal { padding-inline: 14px; }
+}
