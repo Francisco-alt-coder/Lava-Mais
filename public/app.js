@@ -165,31 +165,40 @@ function renderHeader() {
 }
 // Cada função a seguir monta uma tela; render() escolhe qual mostrar.
 function renderTabs() {
-  // Navegação principal fiel às três abas das telas aprovadas.
+  // Quatro opções: assistente ao lado de Perfil, sem trocar a tela do pedido.
   const visible = ['inicio', 'lista', 'pedidos', 'perfil'].includes(state.screen);
   $('#tabbar').classList.toggle('hidden', !visible);
   $('#page').classList.toggle('no-nav', !visible);
-  $('#tabbar').innerHTML = [
+  const entries = [
     ['inicio', 'home', 'Início'],
     ['pedidos', 'orders', 'Pedidos'],
     ['perfil', 'user', 'Perfil'],
-  ].map(([screen, symbol, label]) =>
-    `<button type="button" class="tab ${screen === state.screen || (state.screen === 'lista' && screen === 'inicio') ? 'active' : ''}"
-      data-action="tab" data-screen="${screen}"
-      aria-current="${screen === state.screen ? 'page' : 'false'}">
-      ${icon(symbol)}<span>${label}</span>
-    </button>`
-  ).join('');
+    ['chat', 'bot', 'Assistente IA'],
+  ];
+  $('#tabbar').innerHTML =
+    `<div class="desktop-brand" aria-label="Lava Mais">${icon('car')}<strong>Lava <span>Mais</span></strong></div>` +
+    entries.map(([screen, symbol, label]) => {
+      const assistant = screen === 'chat';
+      const selected = assistant ? state.chatOpen : screen === state.screen ||
+        (state.screen === 'lista' && screen === 'inicio');
+      return `<button type="button" class="tab ${selected ? 'active' : ''}"
+        data-action="${assistant ? 'chat' : 'tab'}"
+        ${assistant ? `aria-haspopup="dialog" aria-controls="chatPanel" aria-expanded="${state.chatOpen}"` : `data-screen="${screen}" aria-current="${selected ? 'page' : 'false'}"`}
+        aria-label="${label}">
+        ${icon(symbol)}<span>${label}</span>
+      </button>`;
+    }).join('');
 }
 function addressCard() {
   return `<button class="location-card" data-action="endereco"><span class="location-icon">${icon('pin')}</span><span><strong>${h(state.endereco.split(',').slice(0, 2).join(',') || 'Definir endereço')}</strong><br>${h(state.endereco.split(',').slice(2).join(',').trim() || 'Toque para alterar')}</span>${icon('chevron', 'chevron')}</button>`;
 }
 function home() {
-  return `<section class="home-hero">
+  return `<div class="home-layout"><section class="home-hero">
       <div class="hero-brand"><span class="hero-icon">${icon('car')}</span><strong>Lava Mais</strong></div>
       <h2>Seu veículo limpo sem sair de casa</h2>
       <p>Agende, acompanhe e receba seu veículo com tranquilidade.</p>
     </section>
+    <section class="home-controls">
     <h2 class="label-title">${icon('pin')} Sua localização</h2>
     ${addressCard()}
     <h2 class="choice-heading">Qual é o seu veículo?</h2>
@@ -204,6 +213,7 @@ function home() {
       </button>
     </div>
     <div class="home-bottom"><button class="primary-btn" data-action="buscar">Buscar lava-jatos ${icon('arrow')}</button></div>
+    </section></div>
     <p class="small-warning">Lava-jatos, endereços e pedidos fictícios. Nenhuma reserva real é realizada.</p>`;
 }
 function storeCard(e) {
@@ -228,7 +238,7 @@ function list() {
     `<button class="pill ${state.filtro === v ? 'active' : ''}" data-action="filtro" data-filtro="${v}" aria-pressed="${state.filtro === v}">${label}</button>`
   ).join('')}</div>
   <p class="list-hint">${icon('pin')} Opções ilustrativas de lava-jatos</p>
-  ${items.map(storeCard).join('') || '<p class="muted-small">Nenhum estabelecimento para esse filtro.</p>'}
+  <section class="store-grid" aria-label="Lava-jatos disponíveis">${items.map(storeCard).join('') || '<p class="muted-small">Nenhum estabelecimento para esse filtro.</p>'}</section>
   <p class="small-warning">*Avaliações e distâncias são fictícias. Esta demonstração não usa sua localização real.</p>`;
 }
 function details() {
@@ -241,6 +251,7 @@ function details() {
       <div><strong>Lavagem com retirada</strong><span>${icon('star')} ${decimal(e.nota)} · ${e.avaliacoes} avaliações fictícias</span>
       <span>${icon('pin')} ${decimal(e.distancia)} km ilustrativos</span></div>
     </section>
+    <div class="details-content"><section class="details-services">
     <h2 class="section-title">Serviços disponíveis</h2>
     <div class="segment">
       <button data-action="veiculo" data-veiculo="carro" class="${state.veiculo === 'carro' ? 'active' : ''}" aria-pressed="${state.veiculo === 'carro'}">Carro</button>
@@ -257,11 +268,11 @@ function details() {
     <label class="pickup-option">${icon('truck')}
       <span><strong>Retirada e devolução: ${e.retirada === 0 ? 'grátis' : brl(e.retirada)}</strong><small>Serviço demonstrativo de busca e entrega.</small></span>
       <input type="checkbox" id="retirada" ${state.retirada ? 'checked' : ''}/>
-    </label>
-    <section class="safety">${icon('shield')}<div><h3>Segurança na demonstração</h3>
+    </label></section>
+    <aside class="details-aside"><section class="safety">${icon('shield')}<div><h3>Segurança na demonstração</h3>
       <ul><li>Acompanhamento das etapas do pedido</li><li>Confirmação de recebimento e avaliação</li><li>Registro demonstrativo de problemas</li></ul>
     </div></section>
-    <button class="primary-btn" data-action="ir-agendamento">Escolher serviço ${icon('arrow')}</button>
+    <button class="primary-btn" data-action="ir-agendamento">Escolher serviço ${icon('arrow')}</button></aside></div>
     <p class="small-warning">Não há prestadores reais nem verificação de identidade nesta versão.</p>`;
 }
 function summary(pedido = null) {
@@ -283,7 +294,7 @@ function agendamento() {
       aria-label="${t.horario}${t.disponivel ? '' : ' indisponível'}" aria-pressed="${state.horario === t.horario}"
       ${!t.disponivel ? 'disabled' : ''}>${t.horario}</button>`
   ).join('') : '<p class="muted-small">Consultando horários disponíveis...</p>';
-  return `<div class="field-block">
+  return `<div class="booking-layout"><section class="booking-fields"><div class="field-block">
       <label>${icon('pin')} Endereço de retirada</label>${addressCard()}
     </div>
     <div class="field-block">
@@ -296,14 +307,14 @@ function agendamento() {
       <p class="slot-help">${state.horarios.length ? (disponivel ? 'Horário escolhido para a simulação.' : 'Escolha um dos horários disponíveis acima.') : 'Aguarde a consulta de horários.'}</p>
       ${state.horarios.length && !state.horarios.some((t) => t.disponivel)
         ? `<div class="error-box">${icon('alert')} Não há horários disponíveis nesta data. Escolha outra.</div>` : ''}
-    </div>
+    </div></section><aside class="booking-summary">
     ${summary()}
     <div class="action-bottom">
       <button class="primary-btn" data-action="confirmar-pedido" ${!disponivel ? 'disabled' : ''}>
         Confirmar pedido ${icon('arrow')}
       </button>
     </div>
-    <p class="small-warning">Agendamento demonstrativo, sem pagamento ou contratação de serviço real.</p>`;
+    <p class="small-warning">Agendamento demonstrativo, sem pagamento ou contratação de serviço real.</p></aside></div>`;
 }
 function tracking() {
   const p = state.pedido;
@@ -449,12 +460,13 @@ function openChat() {
   $('#chatPanel').classList.remove('hidden');
   $('#chatFab').classList.add('hidden');
   renderChat();
+  renderTabs();
   $('#chatInput').focus();
 }
 function closeChat() {
   state.chatOpen = false;
   $('#chatPanel').classList.add('hidden');
-  $('#chatFab').classList.remove('hidden');
+  renderTabs();
 }
 function renderChat() {
   $('#chatMessages').innerHTML =
