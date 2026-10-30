@@ -6,6 +6,56 @@ Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A 
 
 **Etapa acadêmica:** protótipo de interface integrado a uma API. A correspondência com uma TED específica, os requisitos aprovados e a validação de um cliente ainda precisam ser informados pela equipe.
 
+## Revisão visual das seis telas aprovadas (proposta em branch)
+
+Referência visual: seis capturas aprovadas pela equipe (Início, Lava-jatos próximos, Detalhes, Agendamento, Acompanhar pedido e Entrega do veículo). A implementação usa elementos HTML interativos, não imagens estáticas no lugar dos botões.
+
+As seis telas da interface foram construídas a partir dos exemplos visuais aprovados pela equipe:
+
+- **Início:** identidade azul, seleção de carro/moto e endereço fictício, sem elementos extras sobre o desenho aprovado.
+- **Lava-jatos próximos:** cartões e filtros de veículo; distâncias e notas continuam fictícias.
+- **Detalhes:** seleção de lavagem simples/completa e retirada/devolução.
+- **Agendamento:** data, lista de horários, bloqueio de horário indisponível e total calculado pela API.
+- **Acompanhamento:** linha do tempo, estado demonstrativo, atualização e acesso ao assistente.
+- **Entrega:** resumo, avaliação por estrelas, confirmação e relato de problema.
+
+**Navegação atualizada após revisão da equipe:** a barra inferior do celular apresenta **Início, Pedidos, Perfil e Assistente IA**, nessa ordem. No desktop, as mesmas quatro opções ficam no menu horizontal superior. A aba IA abre o chat sem perder a tela atual. O assistente também continua acessível por **Falar com o lava-jato** no acompanhamento e pelo Perfil. Esse botão abre um assistente virtual, não conversa com um estabelecimento real.
+Sem `GROQ_API_KEY`, oferece respostas locais demonstrativas; com chave válida, o servidor tenta consultar a Groq.
+As perguntas rápidas `Preços`, `Como agendar` e `Meu pedido` ajudam a começar a conversa.
+O navegador **nunca** deve receber a chave da API.
+
+### Endereço de retirada e localização atual
+
+Ao clicar em **Sua localização**, abre-se uma janela responsiva com duas opções:
+**Minha localização** ou **Inserir manualmente**.
+
+- A localização real **só é solicitada após clicar em "Usar minha localização atual"** e depende de permissão do navegador, em HTTPS ou localhost.
+- Quando autorizada, a API de geolocalização do navegador acompanha a posição **somente enquanto a janela estiver aberta**, encerrando ao fechar/salvar ou trocar para entrada manual.
+- Uma consulta de geocodificação reversa ao serviço público **Photon (Komoot)** tenta sugerir rua/bairro/cidade. Não há garantia de número exato; quando não informado, é exigida confirmação manual. O resultado pode conter imprecisões.
+- O mapa usa dados OpenStreetMap após a autorização. O navegador envia coordenadas a esses fornecedores para apresentar o mapa/endereço, com aviso de privacidade na interface.
+- O Lava Mais não salva latitude/longitude e envia somente uma descrição genérica do endereço para a API pública de pedidos. O endereço escolhido pelo usuário fica na interface enquanto a página permanece aberta. Recarregar pode fazer o acompanhamento mostrar essa descrição genérica.
+- Se GPS, permissões, mapa ou geocodificação falharem, **Inserir manualmente** continua disponível.
+- As distâncias e os estabelecimentos cadastrados são ilustrativos, sem recálculo geográfico. Não existe retirada real contratada pelo site.
+
+O Photon é uma API de demonstração, sujeita a limites de uso e sem garantia de disponibilidade. Para produção com pedidos reais, é necessário contratar/prover serviço de geocodificação apropriado e implementar autorização e persistência segura. Documentação: https://github.com/komoot/photon e https://github.com/komoot/photon/blob/master/docs/api-v1.md.
+
+### Assistente virtual
+
+O assistente oferece respostas automáticas úteis sobre serviços, preços, horários, endereço e acompanhamento, sem exibir instruções de variáveis de ambiente. A integração com a **Groq** já existente continua opcional e limitada ao servidor. **Neste serviço Render, sem credencial configurada, o assistente responde por regras locais**, não por modelo de IA generativa. Isso evita apresentar uma integração externa como ativa sem validação.
+
+### Validação da proposta
+
+1. Execute `npm ci`, `npm run check`, `npm test` e `npm start`.
+2. Abra `http://localhost:3000`; percorra Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega.
+3. Selecione uma data futura e um horário disponível; **10:00** permanece bloqueado.
+4. Clique em **Assistente IA** imediatamente após Perfil, no desktop ou celular. Verifique as respostas automáticas e os atalhos de chat. Teste a Groq separadamente apenas quando configurada no servidor.
+5. Clique em Sua localização, teste os dois modos, permissões concedida e negada e o preenchimento manual. Depois, inspecione em tela pequena (320/375 px), tablet (768/1024 px) e desktop (1366/1920 px). No computador, o conteúdo ocupa uma área central ampla, com cartões em colunas e menu no topo; no celular, as quatro abas ficam no rodapé.
+6. Peça aprovação da equipe antes de incorporar a branch à `main`.
+
+**Limitações:** não existe integração com lava-jatos reais, autenticação, persistência em banco, rastreamento de veículos ou previsão real de chegada. O botão “Falar com o lava-jato” abre o assistente virtual, sem encaminhamento a estabelecimentos. A integração Groq com credencial real e os testes visuais em aparelhos da equipe ainda precisam ser verificados.
+
+---
+
 ## Funcionalidades demonstradas
 
 1. **Início:** escolha entre carro e moto e edição de endereço fictício.
@@ -15,7 +65,7 @@ Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A 
 5. **Acompanhamento:** progresso por etapas, avançado manualmente na demonstração.
 6. **Entrega:** avaliação de 1 a 5 estrelas, confirmação e registro de problema.
 
-As abas **Pedidos** e **Perfil** complementam a navegação. A interface apresenta o último pedido criado naquele navegador. O assistente responde com regras locais quando a Groq não está configurada; com chave válida, o servidor tenta consultar a API da Groq.
+As abas **Pedidos**, **Perfil** e **Assistente IA** complementam a navegação. A interface apresenta o último pedido criado naquele navegador. O assistente responde com regras locais quando a Groq não está configurada; com chave válida, o servidor tenta consultar a API da Groq.
 
 ## Tecnologias
 
@@ -26,7 +76,7 @@ As abas **Pedidos** e **Perfil** complementam a navegação. A interface apresen
 | Configuração   | dotenv e variáveis de ambiente                                          |
 | IA opcional    | API de chat da Groq, chamada apenas pelo servidor                       |
 | Testes         | Executor de testes nativo do Node.js                                    |
-| Imagens        | Ilustrações próprias criadas com auxílio de IA e referências fornecidas |
+| Ícones         | SVGs definidos nos arquivos da interface, sem dependência de biblioteca externa |
 
 Não são necessários React, banco de dados ou ferramentas de compilação para executar esta versão. Os arquivos foram mantidos separados por responsabilidade para facilitar a explicação e a manutenção.
 
@@ -134,7 +184,7 @@ lava-mais/
 
 - Pedidos são guardados apenas em memória e desaparecem ao reiniciar o servidor.
 - O navegador lembra somente o identificador do último pedido. Não é um histórico de usuário.
-- Não existem autenticação, autorização, banco de dados, pagamentos, geolocalização ou rastreamento real.
+- Não existem autenticação, autorização, banco de dados, pagamentos nem rastreamento de veículos em tempo real. A geolocalização com permissão é utilizada exclusivamente para sugerir o endereço de retirada na interface.
 - O catálogo é fictício. O botão de ligar não faz chamadas telefônicas.
 - Endpoints de pedidos não têm controle de acesso: **não use dados pessoais reais nem publique esta API como serviço de produção**.
 - A integração Groq não foi validada com chave real nesta revisão.
@@ -145,11 +195,11 @@ O código está disponível para avaliação acadêmica. A licença de distribui
 
 ## Repositório e atualização
 
-O projeto está no GitHub: [Francisco-alt-coder/Lava-Mais](https://github.com/Francisco-alt-coder/Lava-Mais). Antes de publicar uma nova versão, a equipe deve conferir as alterações com `git status` e `git diff`, testar o funcionamento e fazer um commit com uma mensagem que descreva a mudança. Nenhum envio automático ao GitHub é exigido para executar o projeto localmente.
+O projeto está no GitHub: [Francisco-alt-coder/Lava-Mais](https://github.com/Francisco-alt-coder/Lava-Mais). Para revisar alterações locais, utilize `git status`, `git diff`, `npm run check` e `npm test`, antes de registrar um commit com descrição técnica objetiva.
 
 ## Histórico e autoria
 
-O projeto preserva a arquitetura da versão 2.1. A revisão 2.2 tornou o código mais didático e corrigiu detalhes de interação, sem adicionar serviços reais. Os documentos anteriores foram removidos da árvore atual para simplificar o repositório, mas podem ser recuperados pelo histórico de commits do Git.
+O projeto mantém HTML, CSS, JavaScript, Node.js e Express. A versão revisada contém seis telas, interface adaptada a desktop e celular, endereço de retirada por GPS ou entrada manual, acompanhamento de etapas e assistente virtual. Os documentos anteriores foram removidos da árvore atual para simplificar o repositório, mas podem ser recuperados pelo histórico de commits do Git.
 
 ### Participação dos estudantes
 
@@ -161,16 +211,3 @@ Os comentários nos arquivos explicam **como** e **por que** as funções foram 
 | Interface e navegação                | [inserir nomes]               | [commits ou capturas]      |
 | API, agendamento e regras de negócio | [inserir nomes]               | [commits ou testes]        |
 | Testes, revisão e apresentação       | [inserir nomes]               | [resultados e registros]   |
-
-**Transparência:** a revisão 2.2 foi preparada com apoio do ChatGPT. Antes da entrega, os estudantes devem executar o projeto, conferir os resultados, registrar suas próprias correções e preencher a declaração de uso de IA conforme as orientações da disciplina. Não atribua a um integrante uma atividade que ele não realizou.
-
-### Registro resumido do uso de IA
-
-| Campo                             | Informação                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Ferramenta                        | ChatGPT                                                                                          |
-| Finalidade                        | Revisão didática do código, correções, testes e organização do repositório                       |
-| Forma de utilização               | Análise e edição de JavaScript, Node.js, README e testes, com conferência no GitHub              |
-| Contribuição da IA                | Comentários explicativos, ajustes de horários e interface, documentação e apoio à publicação     |
-| Validações e correções dos alunos | [inserir responsáveis, testes manuais e modificações reais]                                      |
-| Evidências preservadas            | Histórico de commits, conversas, testes automatizados e versões anteriores recuperáveis pelo Git |
