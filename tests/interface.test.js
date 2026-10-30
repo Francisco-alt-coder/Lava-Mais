@@ -53,16 +53,20 @@ function interfaceFixture() {
   };
 }
 
-test('barra inferior mantém apenas Início, Pedidos e Perfil', () => {
+test('navegação mostra Assistente IA imediatamente depois de Perfil', () => {
   const ui = interfaceFixture();
   ui.html('renderTabs()');
   const nav = ui.elements.get('#tabbar').innerHTML;
+  assert.equal((nav.match(/class="tab\b/g) || []).length, 4);
   assert.equal((nav.match(/data-action="tab"/g) || []).length, 3);
+  assert.equal((nav.match(/data-action="chat"/g) || []).length, 1);
   assert.match(nav, /Início/);
   assert.match(nav, /Pedidos/);
   assert.match(nav, /Perfil/);
+  assert.match(nav, /Assistente IA/);
+  assert.ok(nav.indexOf('Perfil') < nav.indexOf('Assistente IA'));
+  assert.match(nav, /aria-controls="chatPanel"/);
   assert.doesNotMatch(nav, /data-screen="chat"/);
-  assert.doesNotMatch(nav, />IA<\/span>/);
 });
 
 test('seis telas mantêm os principais componentes do fluxo aprovado', () => {
@@ -97,10 +101,24 @@ test('agendamento exige um horário disponível antes de confirmar', () => {
   assert.match(screen, /data-action="confirmar-pedido" disabled/);
 });
 
-test('assistente é acessado por contexto, não por nova aba', () => {
+test('assistente também continua acessível pelo acompanhamento e Perfil', () => {
   const ui = interfaceFixture();
   assert.match(ui.html('tracking()'), /data-action="chat"/);
   assert.match(ui.html('tracking()'), /Falar com o lava-jato/);
   assert.match(ui.html('perfil()'), /Assistente de IA Lava Mais/);
   assert.match(ui.html('perfil()'), /data-action="chat"/);
+});
+
+test('áreas de desktop e celular têm estrutura responsiva', () => {
+  const ui = interfaceFixture();
+  assert.match(ui.html('home()'), /class="home-layout"/);
+  assert.match(ui.html('list()'), /class="store-grid"/);
+  assert.match(ui.html('details()'), /class="details-content"/);
+  assert.match(ui.html('agendamento()'), /class="booking-layout"/);
+  const css = readFileSync(new URL('../public/app.css', import.meta.url), 'utf8');
+  assert.match(css, /@media \(min-width: 821px\)/);
+  assert.match(css, /@media \(max-width: 820px\)/);
+  assert.match(css, /\.home-layout\s*\{\s*display:\s*grid/);
+  assert.match(css, /\.store-grid\s*\{\s*display:\s*grid/);
+  assert.match(css, /\.chat-panel\s*\{\s*position:\s*fixed/);
 });
