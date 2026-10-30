@@ -102,14 +102,14 @@ function respostaSemIA(msg) {
       : /simples/.test(s)
         ? `a lavagem ${simples}`
         : `a lavagem ${simples}; a lavagem ${completa}`;
-    return `Na demonstração, ${tipos}. Os preços variam conforme o lava-jato. Retirada e devolução podem ter custo adicional. Confira o resumo antes de confirmar.`;
+    return `No catálogo, ${tipos}. Os preços variam conforme o lava-jato. Retirada e devolução podem ter custo adicional. Confira o resumo antes de confirmar.`;
   }
   if (/hor|agend|marcar|reserv|dispon/.test(s))
     return 'Para simular um agendamento, escolha um lava-jato, o serviço, a data e um horário disponível. O horário 10:00 está indisponível neste exemplo. Nenhuma reserva é enviada a um estabelecimento real.';
-  if (/acompan|entrega|buscar|retirad|pedido/.test(s))
-    return 'No menu Pedidos você pode acompanhar um pedido demonstrativo. Use “Avançar etapa (demo)” para visualizar a retirada, a lavagem e a devolução.';
   if (/localiza|endere|gps|retirad.*local|onde estou/.test(s))
     return 'Toque em Sua localização e escolha Minha localização para permitir o acesso pelo navegador, ou Inserir manualmente para informar o endereço. A localização serve somente para preencher a interface; os agendamentos do catálogo ainda são ilustrativos.';
+  if (/acompan|entrega|buscar|retirad|pedido/.test(s))
+    return 'No menu Pedidos você pode acompanhar as etapas do pedido registrado nesta versão. Os estados podem ser avançados manualmente para conferir retirada, lavagem e devolução.';
   if (/moto|carro|complet|simples|lavagem/.test(s))
     return 'A lavagem simples inclui limpeza externa. A completa inclui limpeza externa e interna. Escolha carro ou moto na página inicial e confira os valores no estabelecimento desejado.';
   return 'Olá! Sou o assistente virtual do Lava Mais. Posso ajudar você a escolher uma lavagem, consultar preços, entender os horários, informar um endereço e acompanhar as etapas do pedido. O que você gostaria de saber?';
