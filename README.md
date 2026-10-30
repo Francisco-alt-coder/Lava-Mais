@@ -24,13 +24,32 @@ Sem `GROQ_API_KEY`, oferece respostas locais demonstrativas; com chave válida, 
 As perguntas rápidas `Preços`, `Como agendar` e `Meu pedido` ajudam a começar a conversa.
 O navegador **nunca** deve receber a chave da API.
 
+### Endereço de retirada e localização atual
+
+Ao clicar em **Sua localização**, abre-se uma janela responsiva com duas opções:
+**Minha localização** ou **Inserir manualmente**.
+
+- A localização real **só é solicitada após clicar em "Usar minha localização atual"** e depende de permissão do navegador, em HTTPS ou localhost.
+- Quando autorizada, a API de geolocalização do navegador acompanha a posição **somente enquanto a janela estiver aberta**, encerrando ao fechar/salvar ou trocar para entrada manual.
+- Uma consulta de geocodificação reversa ao serviço público **Photon (Komoot)** tenta sugerir rua/bairro/cidade. Não há garantia de número exato; quando não informado, é exigida confirmação manual. O resultado pode conter imprecisões.
+- O mapa usa dados OpenStreetMap após a autorização. O navegador envia coordenadas a esses fornecedores para apresentar o mapa/endereço, com aviso de privacidade na interface.
+- O Lava Mais não salva latitude/longitude e envia somente uma descrição genérica do endereço para a API pública de pedidos. O endereço escolhido pelo usuário fica na interface enquanto a página permanece aberta. Recarregar pode fazer o acompanhamento mostrar essa descrição genérica.
+- Se GPS, permissões, mapa ou geocodificação falharem, **Inserir manualmente** continua disponível.
+- As distâncias e os estabelecimentos cadastrados são ilustrativos, sem recálculo geográfico. Não existe retirada real contratada pelo site.
+
+O Photon é uma API de demonstração, sujeita a limites de uso e sem garantia de disponibilidade. Para produção com pedidos reais, é necessário contratar/prover serviço de geocodificação apropriado e implementar autorização e persistência segura. Documentação: https://github.com/komoot/photon e https://github.com/komoot/photon/blob/master/docs/api-v1.md.
+
+### Assistente virtual
+
+O assistente oferece respostas automáticas úteis sobre serviços, preços, horários, endereço e acompanhamento, sem exibir instruções de variáveis de ambiente. A integração com a **Groq** já existente continua opcional e limitada ao servidor. **Neste serviço Render, sem credencial configurada, o assistente responde por regras locais**, não por modelo de IA generativa. Isso evita apresentar uma integração externa como ativa sem validação.
+
 ### Validação da proposta
 
 1. Execute `npm ci`, `npm run check`, `npm test` e `npm start`.
 2. Abra `http://localhost:3000`; percorra Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega.
 3. Selecione uma data futura e um horário disponível; **10:00** permanece bloqueado.
-4. Clique em **Assistente IA** imediatamente após Perfil, no desktop ou celular. Verifique também os atalhos em Acompanhamento e Perfil. Teste a Groq separadamente com chave válida quando configurada no servidor.
-5. Inspecione visualmente em tela pequena (320/375 px), tablet (768/1024 px) e desktop (1366/1920 px). No computador, o conteúdo ocupa uma área central ampla, com cartões em colunas e menu no topo; no celular, as quatro abas ficam no rodapé.
+4. Clique em **Assistente IA** imediatamente após Perfil, no desktop ou celular. Verifique as respostas automáticas e os atalhos de chat. Teste a Groq separadamente apenas quando configurada no servidor.
+5. Clique em Sua localização, teste os dois modos, permissões concedida e negada e o preenchimento manual. Depois, inspecione em tela pequena (320/375 px), tablet (768/1024 px) e desktop (1366/1920 px). No computador, o conteúdo ocupa uma área central ampla, com cartões em colunas e menu no topo; no celular, as quatro abas ficam no rodapé.
 6. Peça aprovação da equipe antes de incorporar a branch à `main`.
 
 **Limitações:** não existe serviço real, autenticação, persistência em banco, rastreamento do motorista ou previsão real de chegada. A palavra “Falar” abre o assistente virtual, sem encaminhamento a estabelecimentos. A inspeção visual no navegador, a integração Groq com credencial real e a validação da equipe ainda devem ser documentadas.
