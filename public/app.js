@@ -220,7 +220,7 @@ function home() {
     </div>
     <div class="home-bottom"><button class="primary-btn" data-action="buscar">Buscar lava-jatos ${icon('arrow')}</button></div>
     </section></div>
-    <p class="small-warning">Catálogo ilustrativo. Nenhum serviço real é contratado nesta versão.</p>`;
+    `;
 }
 function storeCard(e) {
   return `<button class="store-card" data-action="abrir-loja" data-id="${h(e.id)}">
