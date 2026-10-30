@@ -12,6 +12,7 @@ function interfaceFixture() {
       if (!elements.has(selector)) {
         elements.set(selector, {
           innerHTML: '',
+          dataset: {},
           classList: { toggle() {}, add() {}, remove() {} },
           addEventListener() {},
         });
@@ -121,4 +122,39 @@ test('áreas de desktop e celular têm estrutura responsiva', () => {
   assert.match(css, /\.home-layout\s*\{\s*display:\s*grid/);
   assert.match(css, /\.store-grid\s*\{\s*display:\s*grid/);
   assert.match(css, /\.chat-panel\s*\{\s*position:\s*fixed/);
+});
+
+test('endereço abre duas opções e formulário manual funcional', () => {
+  const ui = interfaceFixture();
+  ui.html("$('#modal').dataset.mode = 'endereco'; locationDraft.mode = 'gps'; renderAddressModal()");
+  const gps = ui.elements.get('#modal').innerHTML;
+  assert.match(gps, /Endereço de retirada/);
+  assert.match(gps, /Minha localização/);
+  assert.match(gps, /Inserir manualmente/);
+  assert.match(gps, /data-action="localizacao-atual"/);
+  assert.match(gps, /Salvar/);
+  assert.match(gps, /disabled/);
+
+  ui.html("locationDraft.mode = 'manual'; locationDraft.manual = 'Rua das Flores, 123, Centro'; renderAddressModal()");
+  const manual = ui.elements.get('#modal').innerHTML;
+  assert.match(manual, /id="modalAddress"/);
+  assert.match(manual, /Rua das Flores, 123, Centro/);
+  assert.doesNotMatch(manual, /data-action="localizacao-atual"/);
+});
+
+test('mapa possui marcador, e endereço do navegador não entra na API pública', () => {
+  const ui = interfaceFixture();
+  const url = ui.html("mapUrl(-7.532, -46.036)");
+  assert.match(url, /openstreetmap.org\/export\/embed.html/);
+  assert.match(url, /marker=-7\.532000%2C-46\.036000/);
+  const javascript = readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(javascript, /endereco: 'Endereço informado na interface'/);
+  assert.match(javascript, /navigator\.geolocation\.watchPosition/);
+  assert.match(javascript, /navigator\.geolocation\.clearWatch/);
+});
+
+test('chat local responde sem instruções sobre chaves ou arquivos do servidor', () => {
+  const backend = readFileSync(new URL('../server.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(backend, /configure a chave no arquivo \.env do servidor/i);
+  assert.match(backend, /endereço.*retirada/);
 });
