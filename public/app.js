@@ -107,12 +107,18 @@ const state = {
     {
       role: 'assistant',
       content:
-        'Olá! Sou o assistente do Lava Mais. Posso explicar os serviços, os preços demonstrativos e como acompanhar seu pedido. Como posso ajudar?',
+        'Olá! Posso ajudar a escolher sua lavagem, consultar preços, informar o endereço de retirada ou acompanhar um pedido. Como posso ajudar?',
     },
   ],
   chatMode: '',
   favoritos: new Set(),
 };
+const locationDraft = {
+  mode: 'gps', manual: '', address: '', lat: null, lon: null, accuracy: null,
+  status: 'idle', error: '', watchId: null, reverseStarted: false,
+  lastUpdate: '', lastMapLat: null, lastMapLon: null, requestToken: 0,
+};
+// Posição GPS usada somente enquanto o modal estiver aberto.
 const loja = () =>
   state.estabelecimentos.find((e) => e.id === state.lavaJatoId) || state.estabelecimentos[0];
 const valorServico = () => {
@@ -190,7 +196,7 @@ function renderTabs() {
     }).join('');
 }
 function addressCard() {
-  return `<button class="location-card" data-action="endereco"><span class="location-icon">${icon('pin')}</span><span><strong>${h(state.endereco.split(',').slice(0, 2).join(',') || 'Definir endereço')}</strong><br>${h(state.endereco.split(',').slice(2).join(',').trim() || 'Toque para alterar')}</span>${icon('chevron', 'chevron')}</button>`;
+  return `<button class="location-card" type="button" aria-label="Abrir opções de endereço de retirada" data-action="endereco"><span class="location-icon">${icon('pin')}</span><span><strong>${h(state.endereco.split(',').slice(0, 2).join(',') || 'Definir endereço')}</strong><br>${h(state.endereco.split(',').slice(2).join(',').trim() || 'Toque para alterar')}</span>${icon('chevron', 'chevron')}</button>`;
 }
 function home() {
   return `<div class="home-layout"><section class="home-hero">
@@ -475,10 +481,10 @@ function renderChat() {
     state.mensagens
       .map(
         (m) =>
-          `<div class="bubble ${m.role === 'user' ? 'user' : 'assistant'}">${h(m.content)}${m.modo ? `<small>${m.modo === 'groq' ? 'Resposta por Groq IA' : 'Resposta demonstrativa'}</small>` : ''}</div>`,
+          `<div class="bubble ${m.role === 'user' ? 'user' : 'assistant'}">${h(m.content)}${m.modo ? `<small>${m.modo === 'groq' ? 'Assistente de IA' : 'Atendimento automático'}</small>` : ''}</div>`,
       )
       .join('') + (state.chatBusy ? '<div class="bubble assistant">Digitando...</div>' : '');
-  $('#chatMode').textContent = state.chatMode || 'Atendimento virtual · protótipo';
+  $('#chatMode').textContent = state.chatMode || 'Assistente virtual';
   $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
   $('#chatSend').disabled = state.chatBusy;
 }
@@ -498,7 +504,7 @@ async function chatSubmit(event) {
       body: JSON.stringify({ mensagem, historico }),
     });
     state.mensagens.push({ role: 'assistant', content: j.resposta, modo: j.modo });
-    state.chatMode = j.modo === 'groq' ? 'Conectado à Groq IA' : 'Modo demonstração local';
+    state.chatMode = j.modo === 'groq' ? 'Assistente de IA ativo' : 'Atendimento automático';
   } catch (e) {
     state.mensagens.push({ role: 'assistant', content: e.message });
   } finally {
@@ -615,15 +621,16 @@ document.addEventListener('click', async (event) => {
             veiculo: state.veiculo,
             servico: state.servico,
             retirada: state.retirada,
-            endereco: state.endereco,
+            // O endereço escolhido fica no navegador; a API pública não recebe endereço real.
+            endereco: 'Endereço informado na interface',
             data: state.data,
             horario: state.horario,
           }),
         });
-        state.pedido = j.pedido;
+        state.pedido = { ...j.pedido, endereco: state.endereco };
         storageSet('lavaMaisPedidoId', j.pedido.id);
         navigate('acompanhar');
-        notify('Pedido de demonstração criado!');
+        notify('Pedido registrado para conferência.');
       } catch (e) {
         notify(e.message);
         await loadSlots();
@@ -677,7 +684,7 @@ document.addEventListener('click', async (event) => {
       });
       state.pedido = j.pedido;
       render();
-      notify('Recebimento confirmado no protótipo.');
+      notify('Recebimento confirmado.');
       return;
     }
     if (action === 'problema') {
@@ -754,10 +761,10 @@ async function init() {
     const status = await api('/api/health');
     state.chatMode =
       status.chatbot === 'groq'
-        ? 'Groq configurada · aguardando resposta'
-        : 'Modo demonstração · sem chave Groq';
+        ? 'Assistente de IA disponível'
+        : 'Atendimento automático disponível';
   } catch {
-    state.chatMode = 'Modo demonstração · estado não verificado';
+    state.chatMode = 'Assistente virtual';
   }
   try {
     const j = await api('/api/estabelecimentos');
