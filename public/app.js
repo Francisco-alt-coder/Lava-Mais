@@ -116,7 +116,7 @@ const state = {
 const locationDraft = {
   mode: 'gps', manual: '', address: '', lat: null, lon: null, accuracy: null,
   status: 'idle', error: '', watchId: null, reverseStarted: false,
-  lastUpdate: '', lastMapLat: null, lastMapLon: null, requestToken: 0,
+  lastUpdate: '', lastMapLat: null, lastMapLon: null, requestToken: 0, requiresManual: false,
 };
 // Posição GPS usada somente enquanto o modal estiver aberto.
 const loja = () =>
@@ -220,7 +220,7 @@ function home() {
     </div>
     <div class="home-bottom"><button class="primary-btn" data-action="buscar">Buscar lava-jatos ${icon('arrow')}</button></div>
     </section></div>
-    <p class="small-warning">Lava-jatos, endereços e pedidos fictícios. Nenhuma reserva real é realizada.</p>`;
+    <p class="small-warning">Catálogo ilustrativo. Nenhum serviço real é contratado nesta versão.</p>`;
 }
 function storeCard(e) {
   return `<button class="store-card" data-action="abrir-loja" data-id="${h(e.id)}">
@@ -245,7 +245,7 @@ function list() {
   ).join('')}</div>
   <p class="list-hint">${icon('pin')} Opções ilustrativas de lava-jatos</p>
   <section class="store-grid" aria-label="Lava-jatos disponíveis">${items.map(storeCard).join('') || '<p class="muted-small">Nenhum estabelecimento para esse filtro.</p>'}</section>
-  <p class="small-warning">*Avaliações e distâncias são fictícias. Esta demonstração não usa sua localização real.</p>`;
+  <p class="small-warning">*Avaliações e distâncias são ilustrativas e não calculadas pelo GPS.</p>`;
 }
 function details() {
   const e = loja();
@@ -275,8 +275,8 @@ function details() {
       <span><strong>Retirada e devolução: ${e.retirada === 0 ? 'grátis' : brl(e.retirada)}</strong><small>Serviço demonstrativo de busca e entrega.</small></span>
       <input type="checkbox" id="retirada" ${state.retirada ? 'checked' : ''}/>
     </label></section>
-    <aside class="details-aside"><section class="safety">${icon('shield')}<div><h3>Segurança na demonstração</h3>
-      <ul><li>Acompanhamento das etapas do pedido</li><li>Confirmação de recebimento e avaliação</li><li>Registro demonstrativo de problemas</li></ul>
+    <aside class="details-aside"><section class="safety">${icon('shield')}<div><h3>Informações do atendimento</h3>
+      <ul><li>Acompanhamento das etapas do pedido</li><li>Confirmação de recebimento e avaliação</li><li>Registro de problemas do pedido</li></ul>
     </div></section>
     <button class="primary-btn" data-action="ir-agendamento">Escolher serviço ${icon('arrow')}</button></aside></div>
     <p class="small-warning">Não há prestadores reais nem verificação de identidade nesta versão.</p>`;
@@ -320,7 +320,7 @@ function agendamento() {
         Confirmar pedido ${icon('arrow')}
       </button>
     </div>
-    <p class="small-warning">Agendamento demonstrativo, sem pagamento ou contratação de serviço real.</p></aside></div>`;
+    <p class="small-warning">Agendamento ilustrativo, sem pagamento nem contratação real.</p></aside></div>`;
 }
 function tracking() {
   const p = state.pedido;
@@ -334,7 +334,7 @@ function tracking() {
   return `<section class="tracking-layout">
       <div class="tracking-primary">
         <div class="employee"><span class="avatar">${icon('user')}</span><div class="bio">
-          <span>Equipe demonstrativa</span><strong>${h(p.funcionario)}</strong><span>${h(p.loja)}</span>
+          <span>Equipe de exemplo</span><strong>${h(p.funcionario)}</strong><span>${h(p.loja)}</span>
         </div></div>
         <div class="timeline">${timeline}</div>
       </div>
@@ -342,7 +342,7 @@ function tracking() {
         <section class="status-panel"><p>${icon('truck')} Status do pedido</p>
           <strong>${h(stages[Math.min(p.etapa,5)])}</strong>
           <span>Atualização manual para fins acadêmicos. Não há localização ou previsão em tempo real.</span></section>
-        <section class="tracking-address">${icon('shield')}<div><strong>Retirada demonstrativa</strong><p>${h(p.endereco)}</p></div></section>
+        <section class="tracking-address">${icon('shield')}<div><strong>Endereço informado</strong><p>${h(p.endereco)}</p></div></section>
       </aside>
     </section>
     <div class="tracking-actions">
@@ -463,7 +463,7 @@ function stopLocationWatch() {
 
 function openAddressModal() {
   stopLocationWatch();
-  Object.assign(locationDraft, {mode:'gps',manual:state.endereco,address:'',lat:null,lon:null,accuracy:null,status:'idle',error:'',reverseStarted:false,lastUpdate:'',lastMapLat:null,lastMapLon:null});
+  Object.assign(locationDraft, {mode:'gps',manual:state.endereco,address:'',lat:null,lon:null,accuracy:null,status:'idle',error:'',reverseStarted:false,lastUpdate:'',lastMapLat:null,lastMapLon:null,requiresManual:false});
   $('#modal').dataset.mode = 'endereco';
   $('#modal').classList.remove('hidden');
   renderAddressModal();
@@ -507,7 +507,7 @@ function renderAddressModal() {
     </div>
     <div aria-live="polite">${body}</div>
     <div class="location-buttons"><button type="button" class="secondary-btn" data-action="fechar-modal">Cancelar</button>
-      <button type="button" class="primary-btn" data-action="salvar-modal" ${gps&&!locationDraft.address?'disabled':''}>Salvar</button></div>
+      <button type="button" class="primary-btn" data-action="salvar-modal" ${gps&&(!locationDraft.address||locationDraft.requiresManual)?'disabled':''}>Salvar</button></div>
     </div>`;
 }
 
@@ -535,6 +535,7 @@ async function geocodePosition(lat,lon,token) {
     locationDraft.manual=address.slice(0,180);
     if (street && address.length>=8) {
       locationDraft.address=locationDraft.manual;
+      locationDraft.requiresManual=!p.housenumber;
       if (!p.housenumber) locationDraft.error='Número não identificado. Toque em Editar para completar antes de salvar.';
     } else {
       locationDraft.error='Posição identificada, mas sem rua completa. Toque em Editar para informar o endereço.';
@@ -556,7 +557,7 @@ function startLocationWatch() {
   }
   stopLocationWatch();
   const token=locationDraft.requestToken;
-  Object.assign(locationDraft,{status:'loading',error:'',address:'',reverseStarted:false,lat:null,lon:null,lastMapLat:null,lastMapLon:null});
+  Object.assign(locationDraft,{status:'loading',error:'',address:'',requiresManual:false,reverseStarted:false,lat:null,lon:null,lastMapLat:null,lastMapLon:null});
   renderAddressModal();
   locationDraft.watchId=navigator.geolocation.watchPosition((pos)=>{
     if(token!==locationDraft.requestToken || locationDraft.mode!=='gps') return;
@@ -847,6 +848,9 @@ document.addEventListener('click', async (event) => {
       const address=locationDraft.mode==='manual'
         ? ($('#modalAddress')?.value||'').trim()
         : locationDraft.address.trim();
+      if(locationDraft.mode==='gps' && locationDraft.requiresManual) {
+        notify('Confira o número do endereço na opção Editar antes de salvar.');return;
+      }
       if(address.length<8||address.length>180) {
         notify('Informe um endereço válido com rua, número e cidade.');return;
       }
