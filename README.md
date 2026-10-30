@@ -8,16 +8,18 @@ Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A 
 
 ## Revisão visual das seis telas aprovadas (proposta em branch)
 
+Referência visual: seis capturas aprovadas pela equipe (Início, Lava-jatos próximos, Detalhes, Agendamento, Acompanhar pedido e Entrega do veículo). A implementação usa elementos HTML interativos, não imagens estáticas no lugar dos botões.
+
 A branch `feat/telas-aprovadas-assistente-ia` adapta a apresentação da versão 2.2.0 aos seis exemplos visuais fornecidos pela equipe:
 
-- **Início:** identidade azul, seleção de carro/moto, endereço fictício e atalho para IA.
+- **Início:** identidade azul, seleção de carro/moto e endereço fictício, sem elementos extras sobre o desenho aprovado.
 - **Lava-jatos próximos:** cartões e filtros de veículo; distâncias e notas continuam fictícias.
 - **Detalhes:** seleção de lavagem simples/completa e retirada/devolução.
 - **Agendamento:** data, lista de horários, bloqueio de horário indisponível e total calculado pela API.
 - **Acompanhamento:** linha do tempo, estado demonstrativo, atualização e acesso ao assistente.
 - **Entrega:** resumo, avaliação por estrelas, confirmação e relato de problema.
 
-O assistente aparece na aba **IA**, no início e na tela de acompanhamento.
+O assistente fica acessível por contexto: **Falar com o lava-jato** na tela de acompanhamento (abre um assistente virtual, não um estabelecimento real) e **Assistente de IA Lava Mais** em Perfil. A barra inferior mantém apenas **Início, Pedidos e Perfil**.
 Sem `GROQ_API_KEY`, oferece respostas locais demonstrativas; com chave válida, o servidor tenta consultar a Groq.
 As perguntas rápidas `Preços`, `Como agendar` e `Meu pedido` ajudam a começar a conversa.
 O navegador **nunca** deve receber a chave da API.
@@ -27,11 +29,11 @@ O navegador **nunca** deve receber a chave da API.
 1. Execute `npm ci`, `npm run check`, `npm test` e `npm start`.
 2. Abra `http://localhost:3000`; percorra Início → Lava-jatos → Detalhes → Agendamento → Acompanhamento → Entrega.
 3. Selecione uma data futura e um horário disponível; **10:00** permanece bloqueado.
-4. Clique na aba **IA** e confirme a resposta demonstrativa; teste separadamente a Groq com uma chave válida, se a equipe a tiver configurado.
+4. Abra **Falar com o lava-jato** no acompanhamento ou **Assistente de IA Lava Mais** em Perfil e confirme a resposta demonstrativa; teste separadamente a Groq com uma chave válida, se a equipe a tiver configurado.
 5. Faça inspeção visual em tela pequena (320/375 px), tablet e desktop.
 6. Peça aprovação da equipe antes de incorporar a branch à `main`.
 
-**Limitações:** não existe serviço real, autenticação, persistência em banco, rastreamento do motorista ou previsão real de chegada. A inspeção visual no navegador, a integração Groq com credencial real e a validação da equipe ainda devem ser documentadas.
+**Limitações:** não existe serviço real, autenticação, persistência em banco, rastreamento do motorista ou previsão real de chegada. A palavra “Falar” abre o assistente virtual, sem encaminhamento a estabelecimentos. A inspeção visual no navegador, a integração Groq com credencial real e a validação da equipe ainda devem ser documentadas.
 
 ---
 
