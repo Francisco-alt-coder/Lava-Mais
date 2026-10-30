@@ -156,5 +156,5 @@ test('mapa possui marcador, e endereço do navegador não entra na API pública'
 test('chat local responde sem instruções sobre chaves ou arquivos do servidor', () => {
   const backend = readFileSync(new URL('../server.js', import.meta.url), 'utf8');
   assert.doesNotMatch(backend, /configure a chave no arquivo \.env do servidor/i);
-  assert.match(backend, /endereço.*retirada/);
+  assert.match(backend, /Toque em Sua localização/);
 });
