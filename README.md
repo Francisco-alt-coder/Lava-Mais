@@ -10,7 +10,7 @@ Projeto demonstrativo da disciplina **Programação para Web** (ADS, 2026.2). A 
 
 Referência visual: seis capturas aprovadas pela equipe (Início, Lava-jatos próximos, Detalhes, Agendamento, Acompanhar pedido e Entrega do veículo). A implementação usa elementos HTML interativos, não imagens estáticas no lugar dos botões.
 
-A branch `feat/telas-aprovadas-assistente-ia` adapta a apresentação da versão 2.2.0 aos seis exemplos visuais fornecidos pela equipe:
+As seis telas da interface foram construídas a partir dos exemplos visuais aprovados pela equipe:
 
 - **Início:** identidade azul, seleção de carro/moto e endereço fictício, sem elementos extras sobre o desenho aprovado.
 - **Lava-jatos próximos:** cartões e filtros de veículo; distâncias e notas continuam fictícias.
@@ -52,7 +52,7 @@ O assistente oferece respostas automáticas úteis sobre serviços, preços, hor
 5. Clique em Sua localização, teste os dois modos, permissões concedida e negada e o preenchimento manual. Depois, inspecione em tela pequena (320/375 px), tablet (768/1024 px) e desktop (1366/1920 px). No computador, o conteúdo ocupa uma área central ampla, com cartões em colunas e menu no topo; no celular, as quatro abas ficam no rodapé.
 6. Peça aprovação da equipe antes de incorporar a branch à `main`.
 
-**Limitações:** não existe serviço real, autenticação, persistência em banco, rastreamento do motorista ou previsão real de chegada. A palavra “Falar” abre o assistente virtual, sem encaminhamento a estabelecimentos. A inspeção visual no navegador, a integração Groq com credencial real e a validação da equipe ainda devem ser documentadas.
+**Limitações:** não existe integração com lava-jatos reais, autenticação, persistência em banco, rastreamento de veículos ou previsão real de chegada. O botão “Falar com o lava-jato” abre o assistente virtual, sem encaminhamento a estabelecimentos. A integração Groq com credencial real e os testes visuais em aparelhos da equipe ainda precisam ser verificados.
 
 ---
 
@@ -76,7 +76,7 @@ As abas **Pedidos**, **Perfil** e **Assistente IA** complementam a navegação. 
 | Configuração   | dotenv e variáveis de ambiente                                          |
 | IA opcional    | API de chat da Groq, chamada apenas pelo servidor                       |
 | Testes         | Executor de testes nativo do Node.js                                    |
-| Imagens        | Ilustrações próprias criadas com auxílio de IA e referências fornecidas |
+| Ícones         | SVGs definidos nos arquivos da interface, sem dependência de biblioteca externa |
 
 Não são necessários React, banco de dados ou ferramentas de compilação para executar esta versão. Os arquivos foram mantidos separados por responsabilidade para facilitar a explicação e a manutenção.
 
@@ -184,7 +184,7 @@ lava-mais/
 
 - Pedidos são guardados apenas em memória e desaparecem ao reiniciar o servidor.
 - O navegador lembra somente o identificador do último pedido. Não é um histórico de usuário.
-- Não existem autenticação, autorização, banco de dados, pagamentos, geolocalização ou rastreamento real.
+- Não existem autenticação, autorização, banco de dados, pagamentos nem rastreamento de veículos em tempo real. A geolocalização com permissão é utilizada exclusivamente para sugerir o endereço de retirada na interface.
 - O catálogo é fictício. O botão de ligar não faz chamadas telefônicas.
 - Endpoints de pedidos não têm controle de acesso: **não use dados pessoais reais nem publique esta API como serviço de produção**.
 - A integração Groq não foi validada com chave real nesta revisão.
@@ -195,11 +195,11 @@ O código está disponível para avaliação acadêmica. A licença de distribui
 
 ## Repositório e atualização
 
-O projeto está no GitHub: [Francisco-alt-coder/Lava-Mais](https://github.com/Francisco-alt-coder/Lava-Mais). Antes de publicar uma nova versão, a equipe deve conferir as alterações com `git status` e `git diff`, testar o funcionamento e fazer um commit com uma mensagem que descreva a mudança. Nenhum envio automático ao GitHub é exigido para executar o projeto localmente.
+O projeto está no GitHub: [Francisco-alt-coder/Lava-Mais](https://github.com/Francisco-alt-coder/Lava-Mais). Para revisar alterações locais, utilize `git status`, `git diff`, `npm run check` e `npm test`, antes de registrar um commit com descrição técnica objetiva.
 
 ## Histórico e autoria
 
-O projeto preserva a arquitetura da versão 2.1. A revisão 2.2 tornou o código mais didático e corrigiu detalhes de interação, sem adicionar serviços reais. Os documentos anteriores foram removidos da árvore atual para simplificar o repositório, mas podem ser recuperados pelo histórico de commits do Git.
+O projeto mantém HTML, CSS, JavaScript, Node.js e Express. A versão revisada contém seis telas, interface adaptada a desktop e celular, endereço de retirada por GPS ou entrada manual, acompanhamento de etapas e assistente virtual. Os documentos anteriores foram removidos da árvore atual para simplificar o repositório, mas podem ser recuperados pelo histórico de commits do Git.
 
 ### Participação dos estudantes
 
@@ -211,16 +211,3 @@ Os comentários nos arquivos explicam **como** e **por que** as funções foram 
 | Interface e navegação                | [inserir nomes]               | [commits ou capturas]      |
 | API, agendamento e regras de negócio | [inserir nomes]               | [commits ou testes]        |
 | Testes, revisão e apresentação       | [inserir nomes]               | [resultados e registros]   |
-
-**Transparência:** a revisão 2.2 foi preparada com apoio do ChatGPT. Antes da entrega, os estudantes devem executar o projeto, conferir os resultados, registrar suas próprias correções e preencher a declaração de uso de IA conforme as orientações da disciplina. Não atribua a um integrante uma atividade que ele não realizou.
-
-### Registro resumido do uso de IA
-
-| Campo                             | Informação                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Ferramenta                        | ChatGPT                                                                                          |
-| Finalidade                        | Revisão didática do código, correções, testes e organização do repositório                       |
-| Forma de utilização               | Análise e edição de JavaScript, Node.js, README e testes, com conferência no GitHub              |
-| Contribuição da IA                | Comentários explicativos, ajustes de horários e interface, documentação e apoio à publicação     |
-| Validações e correções dos alunos | [inserir responsáveis, testes manuais e modificações reais]                                      |
-| Evidências preservadas            | Histórico de commits, conversas, testes automatizados e versões anteriores recuperáveis pelo Git |
